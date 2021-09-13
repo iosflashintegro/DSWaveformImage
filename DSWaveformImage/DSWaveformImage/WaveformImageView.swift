@@ -4,7 +4,6 @@ import UIKit
 
 public class WaveformImageView: UIImageView {
     private let waveformImageDrawer: WaveformImageDrawer
-    private var waveformAnalyzer: WaveformAnalyzer?
 
     public var configuration: Waveform.Configuration {
         didSet { updateWaveform() }
@@ -16,13 +15,13 @@ public class WaveformImageView: UIImageView {
 
     override public init(frame: CGRect) {
         configuration = Waveform.Configuration(size: frame.size)
-        waveformImageDrawer = WaveformImageDrawer()
+        waveformImageDrawer = WaveformImageDrawer(qos: .userInitiated)
         super.init(frame: frame)
     }
 
     required public init?(coder aDecoder: NSCoder) {
         configuration = Waveform.Configuration()
-        waveformImageDrawer = WaveformImageDrawer()
+        waveformImageDrawer = WaveformImageDrawer(qos: .userInitiated)
         super.init(coder: aDecoder)
     }
 
@@ -35,16 +34,15 @@ public class WaveformImageView: UIImageView {
     public func reset() {
         waveformAudioURL = nil
         image = nil
+        waveformImageDrawer.cancelWaveformGeneration()
     }
 }
 
 private extension WaveformImageView {
     func updateWaveform() {
         guard let audioURL = waveformAudioURL else { return }
-        waveformImageDrawer.waveformImage(
-            fromAudioAt: audioURL,
-            with: configuration.with(size: bounds.size),
-            qos: .userInteractive
+        waveformImageDrawer.waveformImage(fromAudioAt: audioURL,
+                                          with: configuration.with(size: bounds.size)
         ) { image in
             DispatchQueue.main.async {
                 self.image = image

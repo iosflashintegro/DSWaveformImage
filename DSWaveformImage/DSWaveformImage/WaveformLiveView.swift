@@ -86,7 +86,7 @@ class WaveformLiveLayer: CALayer {
         }
     }
 
-    private let waveformDrawer = WaveformImageDrawer()
+    private let waveformDrawer = WaveformImageDrawer(qos: .userInitiated)
 
     override class func needsDisplay(forKey key: String) -> Bool {
         if key == #keyPath(samples) {
