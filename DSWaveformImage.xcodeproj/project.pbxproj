@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		427707DC224240140001C80B /* DSWaveformImage.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = C365500E1E49278600D24131 /* DSWaveformImage.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		5DFB7A4D26EFA396003BB3DD /* WaveformImageRenderOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DFB7A4A26EFA396003BB3DD /* WaveformImageRenderOperation.swift */; };
+		5DFB7A4E26EFA396003BB3DD /* WavefromAsyncOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DFB7A4B26EFA396003BB3DD /* WavefromAsyncOperation.swift */; };
+		5DFB7A4F26EFA396003BB3DD /* WaveformAnalyzerOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DFB7A4C26EFA396003BB3DD /* WaveformAnalyzerOperation.swift */; };
 		C322CC561E4A475800B52247 /* example_sound_2.m4a in Resources */ = {isa = PBXBuildFile; fileRef = C322CC551E4A475800B52247 /* example_sound_2.m4a */; };
 		C322CC5D1E4A781B00B52247 /* WaveformAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C322CC5C1E4A781B00B52247 /* WaveformAnalyzer.swift */; };
 		C343C9FD22469EA500D76273 /* TempiFFT.swift in Sources */ = {isa = PBXBuildFile; fileRef = C343C9FC22469EA500D76273 /* TempiFFT.swift */; };
@@ -42,6 +45,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		5DFB7A4A26EFA396003BB3DD /* WaveformImageRenderOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WaveformImageRenderOperation.swift; sourceTree = "<group>"; };
+		5DFB7A4B26EFA396003BB3DD /* WavefromAsyncOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WavefromAsyncOperation.swift; sourceTree = "<group>"; };
+		5DFB7A4C26EFA396003BB3DD /* WaveformAnalyzerOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WaveformAnalyzerOperation.swift; sourceTree = "<group>"; };
 		C322CC551E4A475800B52247 /* example_sound_2.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = example_sound_2.m4a; sourceTree = "<group>"; };
 		C322CC5C1E4A781B00B52247 /* WaveformAnalyzer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WaveformAnalyzer.swift; sourceTree = "<group>"; };
 		C343C9FC22469EA500D76273 /* TempiFFT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempiFFT.swift; sourceTree = "<group>"; };
@@ -143,6 +149,9 @@
 				C36550411E4927BC00D24131 /* WaveformImageTypes.swift */,
 				C36550421E4927BC00D24131 /* WaveformImageView.swift */,
 				C38B81BF26B00EBC000AF386 /* WaveformLiveView.swift */,
+				5DFB7A4C26EFA396003BB3DD /* WaveformAnalyzerOperation.swift */,
+				5DFB7A4A26EFA396003BB3DD /* WaveformImageRenderOperation.swift */,
+				5DFB7A4B26EFA396003BB3DD /* WavefromAsyncOperation.swift */,
 			);
 			path = DSWaveformImage;
 			sourceTree = "<group>";
@@ -268,8 +277,11 @@
 			files = (
 				C343C9FD22469EA500D76273 /* TempiFFT.swift in Sources */,
 				C36550461E4927BC00D24131 /* WaveformImageView.swift in Sources */,
+				5DFB7A4D26EFA396003BB3DD /* WaveformImageRenderOperation.swift in Sources */,
+				5DFB7A4F26EFA396003BB3DD /* WaveformAnalyzerOperation.swift in Sources */,
 				C36550441E4927BC00D24131 /* WaveformImageDrawer.swift in Sources */,
 				C36550451E4927BC00D24131 /* WaveformImageTypes.swift in Sources */,
+				5DFB7A4E26EFA396003BB3DD /* WavefromAsyncOperation.swift in Sources */,
 				C322CC5D1E4A781B00B52247 /* WaveformAnalyzer.swift in Sources */,
 				C38B81C026B00EBC000AF386 /* WaveformLiveView.swift in Sources */,
 			);
