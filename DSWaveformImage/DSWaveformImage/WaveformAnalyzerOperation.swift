@@ -63,7 +63,6 @@ public class WaveformAnalyzerOperation: WavefromAsyncOperation {
 
         guard let assetReader = try? AVAssetReader(asset: audioAsset),
               let assetTrack = audioAsset.tracks(withMediaType: .audio).first else {
-                  MyLog("WaveformAnalyzerOperation.main() , ERROR, \(String(describing: self))")
                   print("ERROR loading asset / audio track")
                   self.outputAmplitudes = nil
                   self.completionHandler?(outputAmplitudes)
