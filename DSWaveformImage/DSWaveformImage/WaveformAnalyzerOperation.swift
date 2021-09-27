@@ -63,12 +63,13 @@ public class WaveformAnalyzerOperation: WavefromAsyncOperation {
 
         guard let assetReader = try? AVAssetReader(asset: audioAsset),
               let assetTrack = audioAsset.tracks(withMediaType: .audio).first else {
-            print("ERROR loading asset / audio track")
-            self.outputAmplitudes = nil
-            self.completionHandler?(outputAmplitudes)
-            self.state = .finished
-            return
-        }
+                  MyLog("WaveformAnalyzerOperation.main() , ERROR, \(String(describing: self))")
+                  print("ERROR loading asset / audio track")
+                  self.outputAmplitudes = nil
+                  self.completionHandler?(outputAmplitudes)
+                  self.markAsFinished()
+                  return
+              }
         self.assetReader = assetReader
         self.audioAssetTrack = assetTrack
         
@@ -76,7 +77,7 @@ public class WaveformAnalyzerOperation: WavefromAsyncOperation {
             guard let self = self else { return }
             self.outputAmplitudes = amplitudes
             self.completionHandler?(self.outputAmplitudes)
-            self.state = .finished
+            self.markAsFinished()
         }
     }
     

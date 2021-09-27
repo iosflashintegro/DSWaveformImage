@@ -22,7 +22,7 @@ public class WaveformImageDrawer {
     }
     
     deinit {
-        queue.cancelAllOperations()
+        cancelWaveformGeneration()
     }
     
     

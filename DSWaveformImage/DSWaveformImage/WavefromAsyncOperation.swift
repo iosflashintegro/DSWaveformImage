@@ -41,19 +41,19 @@ extension WavefromAsyncOperation {
     }
     
     override open func start() {
-        if isCancelled {
-            state = .finished
-            return
-        }
-        
-        main()
         state = .executing
+        main()
+        
+        if isCancelled {
+            markAsFinished()
+        }
     }
     
     override open func cancel() {
         super.cancel()
-        if isExecuting {
-            state = .finished
-        }
+    }
+    
+    open func markAsFinished() {
+        state = .finished
     }
 }
