@@ -8,17 +8,16 @@ protocol WaveformImageRenderOutputPass {
 
 
 public class WaveformImageRenderOperation: Operation {
-    
+    // MARK: Public properties
     public var sourceSamples: [Float]?
+    public var configuration: Waveform.Configuration
     
-    private var configuration: Waveform.Configuration
+    // MARK: Private properties
     private var completionHandler: ((_ waveformImage: UIImage?) -> ())?
-    
     private var outputImage: UIImage?
     
     /// Makes sure we always look at the same samples while animating
-    private var lastOffset: Int = 0
-    
+    public var lastOffset: Int = 0
     
     public init(sourceSamples: [Float]? = nil,
                 configuration: Waveform.Configuration,
@@ -59,6 +58,38 @@ public class WaveformImageRenderOperation: Operation {
         }
         return image
     }
+    
+    public func draw(on context: CGContext, from samples: [Float], with configuration: Waveform.Configuration) {
+        context.setAllowsAntialiasing(configuration.shouldAntialias)
+        context.setShouldAntialias(configuration.shouldAntialias)
+
+        drawBackground(on: context, with: configuration)
+        drawGraph(from: samples, on: context, with: configuration)
+    }
+    
+    public func stripeBucket(_ configuration: Waveform.Configuration) -> Int {
+        if case let .striped(stripeConfig) = configuration.style {
+            if configuration.scale >= 1.0 {
+                return Int(stripeConfig.width + stripeConfig.spacing) * Int(configuration.scale)
+            } else {
+                return Int(stripeConfig.width + stripeConfig.spacing)
+            }
+        } else {
+            return 0
+        }
+    }
+    
+    /// Dampen the samples for a smoother animation.
+    public func dampen(_ samples: [Float], with configuration: Waveform.Configuration) -> [Float] {
+        guard let dampening = configuration.dampening, dampening.percentage > 0 else {
+            return samples
+        }
+
+        let count = Float(samples.count)
+        return samples.enumerated().map { x, value -> Float in
+            1 - ((1 - value) * dampFactor(x: Float(x), count: count, with: dampening))
+        }
+    }
 }
 
 
@@ -80,14 +111,6 @@ private extension WaveformImageRenderOperation {
         let dampenedSamples = configuration.shouldDampen ? self.dampen(samples, with: configuration) : samples
         let image = waveformImage(from: dampenedSamples, with: configuration)
         return image
-    }
-
-    private func draw(on context: CGContext, from samples: [Float], with configuration: Waveform.Configuration) {
-        context.setAllowsAntialiasing(configuration.shouldAntialias)
-        context.setShouldAntialias(configuration.shouldAntialias)
-
-        drawBackground(on: context, with: configuration)
-        drawGraph(from: samples, on: context, with: configuration)
     }
 
     private func drawBackground(on context: CGContext, with configuration: Waveform.Configuration) {
@@ -169,30 +192,6 @@ private extension WaveformImageRenderOperation {
             return Int(configuration.size.width * configuration.scale) / stripeBucket(configuration)
         } else {
             return 0
-        }
-    }
-
-    private func stripeBucket(_ configuration: Waveform.Configuration) -> Int {
-        if case let .striped(stripeConfig) = configuration.style {
-            if configuration.scale >= 1.0 {
-                return Int(stripeConfig.width + stripeConfig.spacing) * Int(configuration.scale)
-            } else {
-                return Int(stripeConfig.width + stripeConfig.spacing)
-            }
-        } else {
-            return 0
-        }
-    }
-
-    /// Dampen the samples for a smoother animation.
-    private func dampen(_ samples: [Float], with configuration: Waveform.Configuration) -> [Float] {
-        guard let dampening = configuration.dampening, dampening.percentage > 0 else {
-            return samples
-        }
-
-        let count = Float(samples.count)
-        return samples.enumerated().map { x, value -> Float in
-            1 - ((1 - value) * dampFactor(x: Float(x), count: count, with: dampening))
         }
     }
 

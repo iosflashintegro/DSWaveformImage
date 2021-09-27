@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		427707DC224240140001C80B /* DSWaveformImage.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = C365500E1E49278600D24131 /* DSWaveformImage.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		5D813DB9270213EA00186FC9 /* WaveformLiveImageRenderOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D813DB8270213EA00186FC9 /* WaveformLiveImageRenderOperation.swift */; };
 		5DFB7A4D26EFA396003BB3DD /* WaveformImageRenderOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DFB7A4A26EFA396003BB3DD /* WaveformImageRenderOperation.swift */; };
 		5DFB7A4E26EFA396003BB3DD /* WavefromAsyncOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DFB7A4B26EFA396003BB3DD /* WavefromAsyncOperation.swift */; };
 		5DFB7A4F26EFA396003BB3DD /* WaveformAnalyzerOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DFB7A4C26EFA396003BB3DD /* WaveformAnalyzerOperation.swift */; };
@@ -45,6 +46,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		5D813DB8270213EA00186FC9 /* WaveformLiveImageRenderOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaveformLiveImageRenderOperation.swift; sourceTree = "<group>"; };
 		5DFB7A4A26EFA396003BB3DD /* WaveformImageRenderOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WaveformImageRenderOperation.swift; sourceTree = "<group>"; };
 		5DFB7A4B26EFA396003BB3DD /* WavefromAsyncOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WavefromAsyncOperation.swift; sourceTree = "<group>"; };
 		5DFB7A4C26EFA396003BB3DD /* WaveformAnalyzerOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WaveformAnalyzerOperation.swift; sourceTree = "<group>"; };
@@ -151,6 +153,7 @@
 				C38B81BF26B00EBC000AF386 /* WaveformLiveView.swift */,
 				5DFB7A4C26EFA396003BB3DD /* WaveformAnalyzerOperation.swift */,
 				5DFB7A4A26EFA396003BB3DD /* WaveformImageRenderOperation.swift */,
+				5D813DB8270213EA00186FC9 /* WaveformLiveImageRenderOperation.swift */,
 				5DFB7A4B26EFA396003BB3DD /* WavefromAsyncOperation.swift */,
 			);
 			path = DSWaveformImage;
@@ -283,6 +286,7 @@
 				C36550451E4927BC00D24131 /* WaveformImageTypes.swift in Sources */,
 				5DFB7A4E26EFA396003BB3DD /* WavefromAsyncOperation.swift in Sources */,
 				C322CC5D1E4A781B00B52247 /* WaveformAnalyzer.swift in Sources */,
+				5D813DB9270213EA00186FC9 /* WaveformLiveImageRenderOperation.swift in Sources */,
 				C38B81C026B00EBC000AF386 /* WaveformLiveView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

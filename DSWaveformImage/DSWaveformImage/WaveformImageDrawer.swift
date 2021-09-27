@@ -8,8 +8,11 @@ public class WaveformImageDrawer {
 
     private var qos: QualityOfService
     
+    
     /// only internal; determines whether to draw silence lines in live mode.
     var shouldDrawSilencePadding: Bool = false
+    /// Makes sure we always look at the same samples while animating
+    private var lastOffset: Int = 0
     
     private var queue: OperationQueue
 
@@ -68,23 +71,13 @@ extension WaveformImageDrawer {
     /// Samples need to be normalized within interval `(0...1)`.
     /// Ensure context size & scale match with the configuration's size & scale.
     func draw(waveform samples: [Float], newSampleCount: Int, on context: CGContext, with configuration: Waveform.Configuration) {
-//        guard samples.count > 0 || shouldDrawSilencePadding else {
-//            return
-//        }
-//
-//        let samplesNeeded = Int(configuration.size.width * configuration.scale)
-//
-//        if case .striped = configuration.style, samples.count >= samplesNeeded {
-//            lastOffset = (lastOffset + newSampleCount) % stripeBucket(configuration)
-//        }
-//
-//        // move the window, so that its always at the end (moves the graph after it reached the right side)
-//        let startSample = max(0, samples.count - samplesNeeded)
-//        let clippedSamples = Array(samples[startSample..<samples.count])
-//        let dampenedSamples = configuration.shouldDampen ? dampen(clippedSamples, with: configuration) : clippedSamples
-//        let paddedSamples = shouldDrawSilencePadding ? dampenedSamples + Array(repeating: 1, count: samplesNeeded - clippedSamples.count) : dampenedSamples
-//
-//        draw(on: context, from: paddedSamples, with: configuration)
+        let renderOperation = WaveformLiveImageRenderOperation(sourceSamples: samples,
+                                                               newSampleCount: newSampleCount,
+                                                               configuration: configuration,
+                                                               context: context,
+                                                               lastOffset: lastOffset,
+                                                               shouldDrawSilencePadding: shouldDrawSilencePadding)
+        lastOffset = renderOperation.draw() // start on called thread
     }
 }
 
