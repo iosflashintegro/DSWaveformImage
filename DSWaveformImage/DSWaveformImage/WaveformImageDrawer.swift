@@ -56,6 +56,10 @@ public class WaveformImageDrawer {
     public func cancelWaveformGeneration() {
         queue.cancelAllOperations()
     }
+    
+    public func activeOperationsCount() -> Int {
+        return queue.operationCount
+    }
 }
 
 extension WaveformImageDrawer {

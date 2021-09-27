@@ -36,6 +36,10 @@ public class WaveformImageView: UIImageView {
         image = nil
         waveformImageDrawer.cancelWaveformGeneration()
     }
+    
+    public func activeOperationsCount() -> Int {
+        return waveformImageDrawer.activeOperationsCount()
+    }
 }
 
 private extension WaveformImageView {
