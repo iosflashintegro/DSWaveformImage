@@ -111,5 +111,6 @@ class WaveformLiveLayer: CALayer {
     func reset() {
         lastNewSampleCount = 0
         samples = []
+        setNeedsDisplay()
     }
 }
