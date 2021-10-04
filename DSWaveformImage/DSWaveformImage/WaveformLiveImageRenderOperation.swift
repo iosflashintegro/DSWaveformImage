@@ -11,7 +11,7 @@ import UIKit
 
 class WaveformLiveImageRenderOperation: WaveformImageRenderOperation {
     // MARK: Private properties
-    private var sourceContext: CGContext?   // исходный контекст, в котором нужно проводить отрисовку (не всегда задётся)
+    private var sourceContext: CGContext?
     private var newSampleCount: Int = 0
     private var shouldDrawSilencePadding: Bool = false
     
