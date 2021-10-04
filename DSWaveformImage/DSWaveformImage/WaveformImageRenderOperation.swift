@@ -102,11 +102,6 @@ private extension WaveformImageRenderOperation {
                         completionHandler: @escaping (_ waveformImage: UIImage?) -> ()){
         let image = render(samples: samples, with: configuration)
         completionHandler(image)
-
-//        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-//            let image = self?.render(samples: samples, with: configuration)
-//            completionHandler(image)
-//        }
     }
     
     private func render(samples: [Float],
