@@ -31,8 +31,6 @@ public class WaveformAnalyzerOperation: WavefromAsyncOperation {
     private var assetReader: AVAssetReader!
     private var audioAssetTrack: AVAssetTrack!
     
-    private var analysisQueue: DispatchQueue
-    
     private var audioAssetURL: URL
     private var requiredNumberOfSamples: Int
     private var completionHandler: ((_ amplitudes: [Float]?) -> ())?
@@ -51,11 +49,6 @@ public class WaveformAnalyzerOperation: WavefromAsyncOperation {
         self.audioAssetURL = audioAssetURL
         self.requiredNumberOfSamples = count
         self.completionHandler = completionHandler
-        
-        let queueName = "WaveformAnalyzerOperation_" + NSUUID().uuidString
-        analysisQueue = DispatchQueue(label: queueName,
-                                      qos: DispatchQoS(qosClass: qos, relativePriority: 0))
-        
     }
 
     override public func main() {
@@ -111,21 +104,17 @@ fileprivate extension WaveformAnalyzerOperation {
             switch status {
             case .loaded:
                 let totalSamples = self.totalSamplesOfTrack()
-                self.analysisQueue.async { [weak self] in
-                    guard let self = self else { return }
-                    if self.isCancelled {
-                        return
-                    }
-                    let analysis = self.extract(totalSamples: totalSamples, downsampledTo: requiredNumberOfSamples, fftBands: fftBands)
-                    switch self.assetReader.status {
-                    case .completed:
-                        completionHandler(analysis)
-                    default:
-                        print("ERROR: reading waveform audio data has failed \(self.assetReader.status)")
-                        completionHandler(nil)
-                    }
+                if self.isCancelled {
+                    return
                 }
-
+                let analysis = self.extract(totalSamples: totalSamples, downsampledTo: requiredNumberOfSamples, fftBands: fftBands)
+                switch self.assetReader.status {
+                case .completed:
+                    completionHandler(analysis)
+                default:
+                    print("ERROR: reading waveform audio data has failed \(self.assetReader.status)")
+                    completionHandler(nil)
+                }
             case .failed, .cancelled, .loading, .unknown:
                 print("failed to load due to: \(error?.localizedDescription ?? "unknown error")")
                 completionHandler(nil)
