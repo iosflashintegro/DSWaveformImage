@@ -5,17 +5,14 @@ import CoreGraphics
 
 /// Renders a UIImage of the waveform data calculated by the analyzer.
 public class WaveformImageDrawer {
-
-    private var qos: QualityOfService
-    
-    
     /// only internal; determines whether to draw silence lines in live mode.
     var shouldDrawSilencePadding: Bool = false
     /// Makes sure we always look at the same samples while animating
     private var lastOffset: Int = 0
-    
-    private var queue: OperationQueue
 
+    private var qos: QualityOfService
+    private var queue: OperationQueue
+    
     public init(qos: QualityOfService = .userInitiated) {
         self.qos = qos
         queue = OperationQueue()
@@ -38,7 +35,7 @@ public class WaveformImageDrawer {
         let sampleCount = Int(configuration.size.width * configuration.scale)
         let analyzerOperation = WaveformAnalyzerOperation(audioAssetURL: audioAssetURL,
                                                           count: sampleCount,
-                                                          qos: convertQoS(qos),
+                                                          qos: WaveformSupport.convertQoS(qos),
                                                           completionHandler: nil)
 
         let renderOperation = WaveformImageRenderOperation(sourceSamples: nil,
@@ -79,28 +76,4 @@ extension WaveformImageDrawer {
                                                                shouldDrawSilencePadding: shouldDrawSilencePadding)
         lastOffset = renderOperation.draw() // start on called thread
     }
-}
-
-
-extension WaveformImageDrawer {
-    
-    private func convertQoS(_ sourceQoS: QualityOfService) -> DispatchQoS.QoSClass {
-        var targetQoS: DispatchQoS.QoSClass = .default
-        switch sourceQoS {
-        case .userInteractive:
-            targetQoS = .userInteractive
-        case .userInitiated:
-            targetQoS = .userInitiated
-        case .utility:
-            targetQoS = .utility
-        case .background:
-            targetQoS = .background
-        case .default:
-            targetQoS = .default
-        @unknown default:
-            targetQoS = .default
-        }
-        return targetQoS
-    }
-    
 }

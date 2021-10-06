@@ -198,5 +198,24 @@ public enum Waveform {
             )
         }
     }
+    
+    /// Configuration for WaveformCollectionProvider
+    public struct CollectionConfiguration {
+        public let collectionWidth: CGFloat
+        public let itemsWidth: [CGFloat]
+        public let configuration: Configuration
+        
+        public var itemsCount: Int {
+            return itemsWidth.count
+        }
+        
+        public init(collectionWidth: CGFloat = 0,
+                    itemsWidth: [CGFloat] = [],
+                    configuration: Configuration = Configuration()) {
+            self.collectionWidth = collectionWidth
+            self.itemsWidth = itemsWidth
+            self.configuration = configuration
+        }
+    }
 
 }
