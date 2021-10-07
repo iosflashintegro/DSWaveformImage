@@ -11,9 +11,12 @@ import Foundation
 import Accelerate
 import AVFoundation
 
+protocol WaveformAnalyzerLinearOutputPass {
+    var linearAmplitudes: [Float]? { get }
+}
 
-protocol WaveformAnalyzerOutputPass {
-    var amplitudes: [Float]? { get }
+protocol WaveformAnalyzerChunkOutputPass {
+    var chunkAmplitudes: [[Float]]? { get }
 }
 
 
@@ -33,32 +36,61 @@ public class WaveformAnalyzerOperation: WavefromAsyncOperation {
     
     private var audioAssetURL: URL
     private var requiredNumberOfSamples: Int
-    private var completionHandler: ((_ amplitudes: [Float]?) -> ())?
+    private var chunksCount: [Int] = []
     
-    private var outputAmplitudes: [Float]?
+    private var linearCompletionHandler: ((_ amplitudes: [Float]?) -> ())?
+    private var chunkCompletionHandler: ((_ amplitudes: [[Float]]?) -> ())?
+    
+    private var outputLinearAmplitudes: [Float]?
+    private var outputChunkAmplitudes: [[Float]]?
     
 
     /// - Parameter audioAssetURL: media file url.
     /// - Parameter count: amount of samples to be calculated. Downsamples.
     /// - Parameter qos: QoS of the DispatchQueue the calculations are performed (and returned) on.
-    /// - Parameter completionHandler: called from a background thread. Returns the sampled result or nil in edge-error cases.
+    /// - Parameter completionHandler: called from a background thread. Returns the linear sampled result or nil in edge-error cases.
     public init(audioAssetURL: URL,
                 count: Int,
-                qos: DispatchQoS.QoSClass = .userInitiated,
                 completionHandler: ((_ amplitudes: [Float]?) -> ())?) {
         self.audioAssetURL = audioAssetURL
         self.requiredNumberOfSamples = count
-        self.completionHandler = completionHandler
+        self.linearCompletionHandler = completionHandler
+    }
+    
+    /// - Parameter audioAssetURL: media file url.
+    /// - Parameter count: amount of samples to be calculated. Downsamples.
+    /// - Parameter chunksCount - amount of samples on each chunks
+    /// - Parameter qos: QoS of the DispatchQueue the calculations are performed (and returned) on.
+    /// - Parameter completionHandler: called from a background thread. Returns the sampled result or nil in edge-error cases.
+    /// - Note Count must be equal to amount in chunksCount
+    public init(audioAssetURL: URL,
+                count: Int,
+                chunksCount: [Int],
+                completionHandler: ((_ amplitudes: [[Float]]?) -> ())?) {
+        self.audioAssetURL = audioAssetURL
+        self.requiredNumberOfSamples = count
+        self.chunksCount = chunksCount
+        self.chunkCompletionHandler = completionHandler
     }
 
     override public func main() {
+        let countInChunks = chunksCount.reduce(0, +)
+        if requiredNumberOfSamples != countInChunks {
+            print("ERROR requiredNumberOfSamples \(requiredNumberOfSamples) not equal amount of chunksCount elements \(countInChunks)")
+            self.outputLinearAmplitudes = nil
+            self.linearCompletionHandler?(nil)
+            self.chunkCompletionHandler?(nil)
+            self.markAsFinished()
+            return
+        }
+        
         let audioAsset = AVURLAsset(url: audioAssetURL, options: [AVURLAssetPreferPreciseDurationAndTimingKey: true])
-
         guard let assetReader = try? AVAssetReader(asset: audioAsset),
               let assetTrack = audioAsset.tracks(withMediaType: .audio).first else {
                   print("ERROR loading asset / audio track")
-                  self.outputAmplitudes = nil
-                  self.completionHandler?(outputAmplitudes)
+                  self.outputLinearAmplitudes = nil
+                  self.linearCompletionHandler?(nil)
+                  self.chunkCompletionHandler?(nil)
                   self.markAsFinished()
                   return
               }
@@ -67,8 +99,16 @@ public class WaveformAnalyzerOperation: WavefromAsyncOperation {
         
         samples(count: requiredNumberOfSamples) { [weak self] amplitudes in
             guard let self = self else { return }
-            self.outputAmplitudes = amplitudes
-            self.completionHandler?(self.outputAmplitudes)
+            self.outputLinearAmplitudes = amplitudes
+            if let amplitudes = amplitudes, self.chunksCount.count > 0 {
+                self.outputChunkAmplitudes = amplitudes.chunked(elementCounts: self.chunksCount)
+            }
+            if let linearCompletionHandler = self.linearCompletionHandler {
+                linearCompletionHandler(self.outputLinearAmplitudes)
+            }
+            if let chunkCompletionHandler = self.chunkCompletionHandler {
+                chunkCompletionHandler(self.outputChunkAmplitudes)
+            }
             self.markAsFinished()
         }
     }
@@ -295,10 +335,18 @@ private extension WaveformAnalyzerOperation {
     }
 }
 
+// MARK: - WaveformAnalyzerLinearOutputPass
 
-extension WaveformAnalyzerOperation: WaveformAnalyzerOutputPass {
-    
-    var amplitudes: [Float]? {
-        return outputAmplitudes
+extension WaveformAnalyzerOperation: WaveformAnalyzerLinearOutputPass {
+    var linearAmplitudes: [Float]? {
+        return outputLinearAmplitudes
+    }
+}
+
+// MARK: - WaveformAnalyzerChunkOutputPass
+
+extension WaveformAnalyzerOperation: WaveformAnalyzerChunkOutputPass {
+    var chunkAmplitudes: [[Float]]? {
+        return outputChunkAmplitudes
     }
 }

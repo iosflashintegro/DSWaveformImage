@@ -35,7 +35,6 @@ public class WaveformImageDrawer {
         let sampleCount = Int(configuration.size.width * configuration.scale)
         let analyzerOperation = WaveformAnalyzerOperation(audioAssetURL: audioAssetURL,
                                                           count: sampleCount,
-                                                          qos: WaveformSupport.convertQoS(qos),
                                                           completionHandler: nil)
 
         let renderOperation = WaveformImageRenderOperation(sourceSamples: nil,
@@ -43,7 +42,7 @@ public class WaveformImageDrawer {
                                                            completionHandler: completionHandler)
 
         let adapter = BlockOperation(block: { [unowned analyzerOperation, unowned renderOperation] in
-            renderOperation.sourceSamples = analyzerOperation.amplitudes
+            renderOperation.sourceSamples = analyzerOperation.linearAmplitudes
         })
 
         adapter.addDependency(analyzerOperation)

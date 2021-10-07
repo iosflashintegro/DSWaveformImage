@@ -46,6 +46,9 @@ extension Array {
                 break
             }
             endIndex = startIndex + elementCounts[index]
+            if endIndex >= count {
+                endIndex = count
+            }
             let subarray: [Element] = Array(self[startIndex..<endIndex])
             subarrays.append(subarray)
             startIndex = endIndex

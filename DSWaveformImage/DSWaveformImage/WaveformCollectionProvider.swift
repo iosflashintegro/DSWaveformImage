@@ -11,7 +11,7 @@ import UIKit
 
 /// Provider for waveform devided to chunks.
 public class WaveformCollectionProvider {
-    private var analyzerOperation: WaveformAnalyzerOperation?
+    private var analyzerOperation: (Operation & WaveformAnalyzerChunkOutputPass)?
     private var adapterOperations: [Int: Operation] = [:]                       // adapter operations, created for link analyzerOperation with renderOperation,
                                                                                 // created only if analyzerOperation not completed. key - index
     private var renderOperations: [Int: WaveformImageRenderOperation] = [:]     // render operations. key - index
@@ -43,34 +43,57 @@ public class WaveformCollectionProvider {
     public func prepareSamples(fromAudioAt audioAssetURL: URL,
                                collectionConfiguration: Waveform.CollectionConfiguration) {
         cancelAllWaveformGenaration()
-
+        
         self.collectionConfiguration = collectionConfiguration
         let sampleCount = Int(collectionConfiguration.collectionWidth * collectionConfiguration.configuration.scale)
+        let chunksCount = collectionConfiguration.itemsWidth.map { Int($0 * collectionConfiguration.configuration.scale) }
         let anAnalyzerOperation = WaveformAnalyzerOperation(audioAssetURL: audioAssetURL,
                                                             count: sampleCount,
-                                                            qos: WaveformSupport.convertQoS(qos),
-                                                            completionHandler: { [weak self] amplitudes in
-            guard let self = self, let amplitudes = amplitudes else { return }
-            let itemsCount: [Int] = collectionConfiguration.itemsWidth.map { Int($0 * collectionConfiguration.configuration.scale) } // кол-во сэмплов в каждом отрезке
-            self.samples = amplitudes.chunked(elementCounts: itemsCount)
+                                                            chunksCount: chunksCount,
+                                                            completionHandler: { amplitudes in
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self, let amplitudes = amplitudes else { return }
+                self.samples = amplitudes
+            }
         })
         queue.addOperation(anAnalyzerOperation)
         analyzerOperation = anAnalyzerOperation
     }
     
+    /// Prepare array of samples
+    public func prepareSamples(amplitudes: [Float],
+                               collectionConfiguration: Waveform.CollectionConfiguration) {
+        cancelAllWaveformGenaration()
+
+        self.collectionConfiguration = collectionConfiguration
+        let chunksCount = collectionConfiguration.itemsWidth.map { Int($0 * collectionConfiguration.configuration.scale) }
+        let anAnalyzerOperation = WaveformCreateChunkOperation(sourceSamples: amplitudes,
+                                                               chunksCount: chunksCount) { amplitudes in
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self, let amplitudes = amplitudes else { return }
+                self.samples = amplitudes
+            }
+        }
+        queue.addOperation(anAnalyzerOperation)
+        analyzerOperation = anAnalyzerOperation
+    }
+    
+    
     /// Get image for target index
     public func getImage(for index: Int,
                          size: CGSize,
                          completionHandler: ((_ waveformImage: UIImage?, _ index: Int) -> ())?) {
-        // before call completionHandler, clear adapterOperations & renderOperations for index
-        let completion: (UIImage?) -> Void = { [weak self] image in
-            guard let self = self else {
-                completionHandler?(nil, index)
-                return
+        let completion: (UIImage?) -> Void = { image in
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else {
+                    completionHandler?(nil, index)
+                    return
+                }
+                // before call completionHandler, clear adapterOperations & renderOperations for index
+                self.adapterOperations[index] = nil
+                self.renderOperations[index] = nil
+                completionHandler?(image, index)
             }
-            self.adapterOperations[index] = nil
-            self.renderOperations[index] = nil
-            completionHandler?(image, index)
         }
         
         // if loading samples not called, return nil image
@@ -83,13 +106,12 @@ public class WaveformCollectionProvider {
         let renderOperation = WaveformImageRenderOperation(sourceSamples: nil,
                                                            configuration: configuration,
                                                            completionHandler: completion)
-        let adapter = BlockOperation(block: { [weak self, weak analyzerOperation, weak renderOperation] in
-            guard let self = self, let analyzerOperation = analyzerOperation, let renderOperation = renderOperation else {
+        let adapter = BlockOperation(block: { [weak self, weak renderOperation] in
+            guard let self = self, let renderOperation = renderOperation else {
                 completion(nil)
                 return
             }
-            let _ = analyzerOperation.amplitudes
-            renderOperation.sourceSamples = self.samples[safeIndex: index]
+            renderOperation.sourceSamples = self.analyzerOperation?.chunkAmplitudes?[safeIndex: index]
         })
         adapter.addDependency(analyzerOperation)
         renderOperation.addDependency(adapter)
@@ -110,12 +132,14 @@ public class WaveformCollectionProvider {
     
     /// Cancel generationImage at index
     public func cancelWaveformGeneration(index: Int) {
-        guard let operation = renderOperations[index] else {
-            return
+        if let operation = adapterOperations[index] {
+            operation.cancel()
+            adapterOperations[index] = nil
         }
-        operation.cancel()
-        adapterOperations[index] = nil
-        renderOperations[index] = nil
+        if let operation = renderOperations[index] {
+            operation.cancel()
+            renderOperations[index] = nil
+        }
     }
     
     public func activeOperationsCount() -> Int {
