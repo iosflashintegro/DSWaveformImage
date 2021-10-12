@@ -40,15 +40,9 @@ public class WaveformImageDrawer {
         let renderOperation = WaveformImageRenderOperation(sourceSamples: nil,
                                                            configuration: configuration,
                                                            completionHandler: completionHandler)
+        renderOperation.addDependency(analyzerOperation)
 
-        let adapter = BlockOperation(block: { [unowned analyzerOperation, unowned renderOperation] in
-            renderOperation.sourceSamples = analyzerOperation.linearAmplitudes
-        })
-
-        adapter.addDependency(analyzerOperation)
-        renderOperation.addDependency(adapter)
-
-        queue.addOperations([analyzerOperation, adapter, renderOperation], waitUntilFinished: false)
+        queue.addOperations([analyzerOperation, renderOperation], waitUntilFinished: false)
     }
     
     /// Cancel async rendering

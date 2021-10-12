@@ -47,7 +47,6 @@ public class WaveformAnalyzerOperation: WavefromAsyncOperation {
 
     /// - Parameter audioAssetURL: media file url.
     /// - Parameter count: amount of samples to be calculated. Downsamples.
-    /// - Parameter qos: QoS of the DispatchQueue the calculations are performed (and returned) on.
     /// - Parameter completionHandler: called from a background thread. Returns the linear sampled result or nil in edge-error cases.
     public init(audioAssetURL: URL,
                 count: Int,
@@ -60,7 +59,6 @@ public class WaveformAnalyzerOperation: WavefromAsyncOperation {
     /// - Parameter audioAssetURL: media file url.
     /// - Parameter count: amount of samples to be calculated. Downsamples.
     /// - Parameter chunksCount - amount of samples on each chunks
-    /// - Parameter qos: QoS of the DispatchQueue the calculations are performed (and returned) on.
     /// - Parameter completionHandler: called from a background thread. Returns the sampled result or nil in edge-error cases.
     /// - Note Count must be equal to amount in chunksCount
     public init(audioAssetURL: URL,

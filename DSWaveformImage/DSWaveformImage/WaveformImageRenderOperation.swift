@@ -9,10 +9,24 @@ protocol WaveformImageRenderOutputPass {
 
 public class WaveformImageRenderOperation: Operation {
     // MARK: Public properties
-    public var sourceSamples: [Float]?
+    public var sourceSamples: [Float]? {
+        var samples: [Float]?
+        if let sourceSamples = _sourceSamples {
+            samples = sourceSamples
+        } else if let dataProvider = dependencies
+                    .filter({ $0 is WaveformAnalyzerChunkOutputPass })
+                    .first as? WaveformAnalyzerChunkOutputPass {
+            let index = index ?? 0
+            samples = dataProvider.chunkAmplitudes?[safeIndex: index]
+        }
+        return samples
+    }
+    
     public var configuration: Waveform.Configuration
+    public var index: Int?
     
     // MARK: Private properties
+    private var _sourceSamples: [Float]?
     private var completionHandler: ((_ waveformImage: UIImage?) -> ())?
     private var outputImage: UIImage?
     
@@ -22,25 +36,33 @@ public class WaveformImageRenderOperation: Operation {
     public init(sourceSamples: [Float]? = nil,
                 configuration: Waveform.Configuration,
                 completionHandler: ((_ waveformImage: UIImage?) -> ())?) {
-        self.sourceSamples = sourceSamples
+        self._sourceSamples = sourceSamples
         self.configuration = configuration
         self.completionHandler = completionHandler
     }
     
+    public init(sourceSamples: [Float]? = nil,
+                configuration: Waveform.Configuration,
+                index: Int,
+                completionHandler: ((_ waveformImage: UIImage?) -> ())?) {
+        self._sourceSamples = sourceSamples
+        self.configuration = configuration
+        self.index = index
+        self.completionHandler = completionHandler
+    }
+    
     override public func main() {
-        guard let samples = sourceSamples else {
+        if self.isCancelled {
             return
         }
-        if self.isCancelled {
+        guard let samples = sourceSamples else {
             return
         }
         outputImage = render(samples: samples, with: configuration)
         completionHandler?(outputImage)
     }
     
-    
     /// Renders a UIImage of the provided waveform samples.
-    ///
     /// Samples need to be normalized within interval `(0...1)`.
     public func waveformImage(from samples: [Float], with configuration: Waveform.Configuration) -> UIImage? {
         guard samples.count > 0, samples.count == Int(configuration.size.width * configuration.scale) else {
@@ -208,8 +230,26 @@ private extension WaveformImageRenderOperation {
 }
 
 
+// MARK: - WaveformImageRenderOutputPass
+
 extension WaveformImageRenderOperation: WaveformImageRenderOutputPass {
     var image: UIImage? {
         return outputImage
     }
+}
+
+
+// MARK: - NSCopying
+
+extension WaveformImageRenderOperation: NSCopying {
+    
+    public func copy(with zone: NSZone? = nil) -> Any {
+        let copy = WaveformImageRenderOperation(sourceSamples: self._sourceSamples,
+                                                configuration: self.configuration,
+                                                completionHandler: self.completionHandler)
+        copy.index = self.index
+        copy.outputImage = self.outputImage
+        return copy
+    }
+    
 }

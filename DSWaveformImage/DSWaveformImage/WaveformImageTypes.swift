@@ -216,6 +216,21 @@ public enum Waveform {
             self.itemsWidth = itemsWidth
             self.configuration = configuration
         }
+        
+        public func with(collectionWidth: CGFloat? = nil,
+                         itemsWidth: [CGFloat]? = nil,
+                         configuration: Configuration? = nil) -> CollectionConfiguration {
+            return CollectionConfiguration(collectionWidth: collectionWidth ?? self.collectionWidth,
+                                           itemsWidth: itemsWidth ?? self.itemsWidth,
+                                           configuration: configuration ?? self.configuration)
+        }
+        
+        
+        public func with(collectionWidth: CGFloat = 0,
+                    itemsWidth: [CGFloat] = [],
+                    configuration: Configuration = Configuration()) {
+            
+        }
     }
 
 }

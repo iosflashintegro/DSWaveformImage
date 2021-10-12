@@ -12,8 +12,6 @@ import UIKit
 /// Provider for waveform devided to chunks.
 public class WaveformCollectionProvider {
     private var analyzerOperation: (Operation & WaveformAnalyzerChunkOutputPass)?
-    private var adapterOperations: [Int: Operation] = [:]                       // adapter operations, created for link analyzerOperation with renderOperation,
-                                                                                // created only if analyzerOperation not completed. key - index
     private var renderOperations: [Int: WaveformImageRenderOperation] = [:]     // render operations. key - index
     
     private var qos: QualityOfService
@@ -42,8 +40,6 @@ public class WaveformCollectionProvider {
     /// Analyze audio from url & load all samples
     public func prepareSamples(fromAudioAt audioAssetURL: URL,
                                collectionConfiguration: Waveform.CollectionConfiguration) {
-        cancelAllWaveformGenaration()
-        
         self.collectionConfiguration = collectionConfiguration
         let sampleCount = Int(collectionConfiguration.collectionWidth * collectionConfiguration.configuration.scale)
         let chunksCount = collectionConfiguration.itemsWidth.map { Int($0 * collectionConfiguration.configuration.scale) }
@@ -56,28 +52,56 @@ public class WaveformCollectionProvider {
                 self.samples = amplitudes
             }
         })
+        // recreate render operations with new dependency (if needed(
+        let udpatedRenderOperations = updateDependendentRenderOperation(anAnalyzerOperation)
+        // cancel all exist operations
+        cancelAllWaveformGenaration()
+        // add analyzer oparation to queue
         queue.addOperation(anAnalyzerOperation)
         analyzerOperation = anAnalyzerOperation
+        // if exist, add prev render operation
+        udpatedRenderOperations.forEach {
+            if let index = $0.index {
+                renderOperations[index] = $0
+            }
+            queue.addOperation($0)
+        }
+        // Later, if new renderOperation will be created for exist index, current active operation will cancelled - it's correct
     }
     
     /// Prepare array of samples
     public func prepareSamples(amplitudes: [Float],
-                               collectionConfiguration: Waveform.CollectionConfiguration) {
-        cancelAllWaveformGenaration()
-
+                               newSamplesCount: Int,
+                               collectionConfiguration: Waveform.CollectionConfiguration,
+                               completionHandler: ((_ updatedChunkIndexes: [Int]?) -> ())?) {
         self.collectionConfiguration = collectionConfiguration
         let chunksCount = collectionConfiguration.itemsWidth.map { Int($0 * collectionConfiguration.configuration.scale) }
         let anAnalyzerOperation = WaveformCreateChunkOperation(sourceSamples: amplitudes,
-                                                               chunksCount: chunksCount) { amplitudes in
+                                                               newSamplesCount: newSamplesCount,
+                                                               chunksCount: chunksCount) { amplitudes, updatedChunkIndexes in
             DispatchQueue.main.async { [weak self] in
                 guard let self = self, let amplitudes = amplitudes else { return }
                 self.samples = amplitudes
+                completionHandler?(updatedChunkIndexes)
             }
         }
+        // recreate render operations with new dependency (if needed)
+        let udpatedRenderOperations = updateDependendentRenderOperation(anAnalyzerOperation)
+
+        // cancel all exist operations
+        cancelAllWaveformGenaration()
+        // add analyzer oparation to queue
         queue.addOperation(anAnalyzerOperation)
         analyzerOperation = anAnalyzerOperation
+        // if exist, add prev render operation
+        udpatedRenderOperations.forEach {
+            if let index = $0.index {
+                renderOperations[index] = $0
+            }
+            queue.addOperation($0)
+        }
+        // Later, if new renderOperation will be created for exist index, current active operation will cancelled - it's correct
     }
-    
     
     /// Get image for target index
     public func getImage(for index: Int,
@@ -89,8 +113,7 @@ public class WaveformCollectionProvider {
                     completionHandler?(nil, index)
                     return
                 }
-                // before call completionHandler, clear adapterOperations & renderOperations for index
-                self.adapterOperations[index] = nil
+                // before call completionHandler, clear renderOperations for index
                 self.renderOperations[index] = nil
                 completionHandler?(image, index)
             }
@@ -102,40 +125,31 @@ public class WaveformCollectionProvider {
             return
         }
         
+        // let cancel exist render operation
+        if let existRenderOperation = renderOperations[index] {
+            existRenderOperation.cancel()
+            renderOperations[index] = nil
+        }
+        
         let configuration = collectionConfiguration.configuration.with(size: size)
         let renderOperation = WaveformImageRenderOperation(sourceSamples: nil,
                                                            configuration: configuration,
+                                                           index: index,
                                                            completionHandler: completion)
-        let adapter = BlockOperation(block: { [weak self, weak renderOperation] in
-            guard let self = self, let renderOperation = renderOperation else {
-                completion(nil)
-                return
-            }
-            renderOperation.sourceSamples = self.analyzerOperation?.chunkAmplitudes?[safeIndex: index]
-        })
-        adapter.addDependency(analyzerOperation)
-        renderOperation.addDependency(adapter)
-        
-        adapterOperations[index] = adapter
+        renderOperation.addDependency(analyzerOperation)
         renderOperations[index] = renderOperation
-
-        queue.addOperations([adapter, renderOperation], waitUntilFinished: false)
+        queue.addOperations([renderOperation], waitUntilFinished: false)
     }
     
     /// Cancel all operations
     public func cancelAllWaveformGenaration() {
         queue.cancelAllOperations()
         analyzerOperation = nil
-        adapterOperations.removeAll()
         renderOperations.removeAll()
     }
     
     /// Cancel generationImage at index
     public func cancelWaveformGeneration(index: Int) {
-        if let operation = adapterOperations[index] {
-            operation.cancel()
-            adapterOperations[index] = nil
-        }
         if let operation = renderOperations[index] {
             operation.cancel()
             renderOperations[index] = nil
@@ -144,5 +158,22 @@ public class WaveformCollectionProvider {
     
     public func activeOperationsCount() -> Int {
         return queue.operationCount
+    }
+    
+    /// Recreate WaveformImageRenderOperation (if exist) and set dependency for its to newAnalyzerOperation
+    private func updateDependendentRenderOperation(_ newAnalyzerOperation: (Operation & WaveformAnalyzerChunkOutputPass)) -> [WaveformImageRenderOperation] {
+        guard let existAnalyzerOperation = analyzerOperation else {
+            return []
+        }
+        let existRenderOperations = Array(renderOperations.values).filter( { $0.dependencies.contains(existAnalyzerOperation)} )
+        var copiedOperations: [WaveformImageRenderOperation] = []
+        existRenderOperations.forEach {
+            if let copyRenderOperation = $0.copy() as? WaveformImageRenderOperation {
+                copyRenderOperation.addDependency(newAnalyzerOperation)
+                copiedOperations.append(copyRenderOperation)
+            }
+            $0.removeDependency(existAnalyzerOperation)
+        }
+        return copiedOperations
     }
 }
