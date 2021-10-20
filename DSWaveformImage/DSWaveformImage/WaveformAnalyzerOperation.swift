@@ -134,6 +134,7 @@ fileprivate extension WaveformAnalyzerOperation {
         assetReader.asset.loadValuesAsynchronously(forKeys: ["duration"]) { [weak self] in
             guard let self = self else { return }
             if self.isCancelled {
+                completionHandler(nil)
                 return
             }
             
@@ -143,6 +144,7 @@ fileprivate extension WaveformAnalyzerOperation {
             case .loaded:
                 let totalSamples = self.totalSamplesOfTrack()
                 if self.isCancelled {
+                    completionHandler(nil)
                     return
                 }
                 let analysis = self.extract(totalSamples: totalSamples, downsampledTo: requiredNumberOfSamples, fftBands: fftBands)
