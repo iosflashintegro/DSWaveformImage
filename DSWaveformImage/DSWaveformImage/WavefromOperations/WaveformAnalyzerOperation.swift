@@ -11,17 +11,17 @@ import Foundation
 import Accelerate
 import AVFoundation
 
-protocol WaveformAnalyzerLinearOutputPass {
+public protocol WaveformAnalyzerLinearOutputPass {
     var linearAmplitudes: [Float]? { get }
 }
 
-protocol WaveformAnalyzerChunkOutputPass {
+public protocol WaveformAnalyzerChunkOutputPass: Operation {
     var chunkAmplitudes: [[Float]]? { get }
 }
 
 
 /// Calculates the waveform of the initialized asset URL.
-public class WaveformAnalyzerOperation: WavefromAsyncOperation {
+public class WaveformAnalyzerOperation: AsyncOperation {
     
     fileprivate struct WaveformAnalysis {
         let amplitudes: [Float]
@@ -338,7 +338,7 @@ private extension WaveformAnalyzerOperation {
 // MARK: - WaveformAnalyzerLinearOutputPass
 
 extension WaveformAnalyzerOperation: WaveformAnalyzerLinearOutputPass {
-    var linearAmplitudes: [Float]? {
+    public var linearAmplitudes: [Float]? {
         return outputLinearAmplitudes
     }
 }
@@ -346,7 +346,7 @@ extension WaveformAnalyzerOperation: WaveformAnalyzerLinearOutputPass {
 // MARK: - WaveformAnalyzerChunkOutputPass
 
 extension WaveformAnalyzerOperation: WaveformAnalyzerChunkOutputPass {
-    var chunkAmplitudes: [[Float]]? {
+    public var chunkAmplitudes: [[Float]]? {
         return outputChunkAmplitudes
     }
 }

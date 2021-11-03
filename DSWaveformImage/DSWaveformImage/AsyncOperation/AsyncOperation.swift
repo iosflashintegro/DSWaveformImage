@@ -1,6 +1,6 @@
 import Foundation
 
-open class WavefromAsyncOperation: Operation {
+open class AsyncOperation: Operation {
     public enum State: String {
         case ready, executing, finished
         
@@ -22,7 +22,7 @@ open class WavefromAsyncOperation: Operation {
 }
 
 
-extension WavefromAsyncOperation {
+extension AsyncOperation {
 
     override open var isReady: Bool {
         return super.isReady && state == .ready

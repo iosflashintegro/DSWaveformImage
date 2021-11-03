@@ -2,12 +2,7 @@ import Foundation
 import UIKit
 
 
-protocol WaveformImageRenderOutputPass {
-    var image: UIImage? { get }
-}
-
-
-public class WaveformImageRenderOperation: Operation {
+public class WaveformImageRenderOperation: RenderOperation {
     // MARK: Public properties
     public var sourceSamples: [Float]? {
         var samples: [Float]?
@@ -23,7 +18,6 @@ public class WaveformImageRenderOperation: Operation {
     }
     
     public var configuration: Waveform.Configuration
-    public var index: Int?
     
     // MARK: Private properties
     private var _sourceSamples: [Float]?
@@ -47,8 +41,9 @@ public class WaveformImageRenderOperation: Operation {
                 completionHandler: ((_ waveformImage: UIImage?) -> ())?) {
         self._sourceSamples = sourceSamples
         self.configuration = configuration
-        self.index = index
         self.completionHandler = completionHandler
+        super.init()
+        self.index = index
     }
     
     override public func main() {
@@ -230,9 +225,9 @@ private extension WaveformImageRenderOperation {
 }
 
 
-// MARK: - WaveformImageRenderOutputPass
+// MARK: - ImageRenderOutputPass
 
-extension WaveformImageRenderOperation: WaveformImageRenderOutputPass {
+extension WaveformImageRenderOperation: ImageRenderOutputPass {
     var image: UIImage? {
         return outputImage
     }

@@ -90,7 +90,7 @@ public class WaveformCreateChunkOperation: Operation {
 }
 
 extension WaveformCreateChunkOperation: WaveformAnalyzerChunkOutputPass {
-    var chunkAmplitudes: [[Float]]? {
+    public var chunkAmplitudes: [[Float]]? {
         return outputChunkAmplitudes
     }
 }

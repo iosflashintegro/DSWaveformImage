@@ -198,39 +198,4 @@ public enum Waveform {
             )
         }
     }
-    
-    /// Configuration for WaveformCollectionProvider
-    public struct CollectionConfiguration {
-        public let collectionWidth: CGFloat
-        public let itemsWidth: [CGFloat]
-        public let configuration: Configuration
-        
-        public var itemsCount: Int {
-            return itemsWidth.count
-        }
-        
-        public init(collectionWidth: CGFloat = 0,
-                    itemsWidth: [CGFloat] = [],
-                    configuration: Configuration = Configuration()) {
-            self.collectionWidth = collectionWidth
-            self.itemsWidth = itemsWidth
-            self.configuration = configuration
-        }
-        
-        public func with(collectionWidth: CGFloat? = nil,
-                         itemsWidth: [CGFloat]? = nil,
-                         configuration: Configuration? = nil) -> CollectionConfiguration {
-            return CollectionConfiguration(collectionWidth: collectionWidth ?? self.collectionWidth,
-                                           itemsWidth: itemsWidth ?? self.itemsWidth,
-                                           configuration: configuration ?? self.configuration)
-        }
-        
-        
-        public func with(collectionWidth: CGFloat = 0,
-                    itemsWidth: [CGFloat] = [],
-                    configuration: Configuration = Configuration()) {
-            
-        }
-    }
-
 }
