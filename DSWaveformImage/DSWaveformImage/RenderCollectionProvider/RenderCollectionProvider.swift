@@ -24,7 +24,7 @@ public class RenderCollectionProvider {
         queue = OperationQueue()
         queue.maxConcurrentOperationCount = 1
         queue.qualityOfService = qos
-        queue.name = "WaveformCollectionProvider" + NSUUID().uuidString
+        queue.name = "RenderCollectionProvider_" + NSUUID().uuidString
     }
     
     deinit {
@@ -53,7 +53,7 @@ public class RenderCollectionProvider {
     /// Get image for target index
     public func getImage(for index: Int,
                          size: CGSize,
-                         completionHandler: ((_ waveformImage: UIImage?, _ index: Int) -> ())?) {
+                         completionHandler: ((_ image: UIImage?, _ index: Int) -> ())?) {
         let completion: (UIImage?) -> Void = { image in
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else {
@@ -119,7 +119,7 @@ public class RenderCollectionProvider {
     }
 
     
-    /// Recreate WaveformImageRenderOperation (if exist) and set dependency for its to newAnalyzerOperation
+    /// Recreate RenderOperation (if exist) and set dependency for its to newAnalyzerOperation
     private func updateDependendentRenderOperation(_ newAnalyzerOperation: Operation) -> [RenderOperation] {
         guard let existAnalyzerOperation = analyzerOperation else {
             return []
