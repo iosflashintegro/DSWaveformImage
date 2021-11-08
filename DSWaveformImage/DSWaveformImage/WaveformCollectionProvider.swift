@@ -12,13 +12,10 @@ import UIKit
 /// Provider for waveform devided into chunks.
 public class WaveformCollectionProvider: RenderCollectionProvider {
 
-    private var collectionConfiguration: RenderCollection.CollectionConfiguration
     private var waveformConfiguration: Waveform.Configuration
     private var samples: [[Float]] = []
     
     public override init(qos: QualityOfService = .userInitiated) {
-        collectionConfiguration = RenderCollection.CollectionConfiguration(collectionWidth: 0,
-                                                                           itemsWidth: [])
         waveformConfiguration = Waveform.Configuration()
         super.init(qos: qos)
     }

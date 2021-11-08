@@ -16,10 +16,13 @@ public class RenderCollectionProvider {
     var renderOperations: [Int: Operation] = [:]     // render operations. key - index
     
     var qos: QualityOfService
+    var collectionConfiguration: RenderCollection.CollectionConfiguration
+
     var queue: OperationQueue
 
-
     public init(qos: QualityOfService = .userInitiated) {
+        collectionConfiguration = RenderCollection.CollectionConfiguration(collectionWidth: 0,
+                                                                           itemsWidth: [])
         self.qos = qos
         queue = OperationQueue()
         queue.maxConcurrentOperationCount = 1
