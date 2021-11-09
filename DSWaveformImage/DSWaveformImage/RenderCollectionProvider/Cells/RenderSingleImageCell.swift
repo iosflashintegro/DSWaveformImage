@@ -27,7 +27,7 @@ final class RenderSingleImageCell: RenderCell {
     // MARK: Setup UI
     override func setupUI() {
         super.setupUI()
-        addSubview(imageView)
+        contentView.addSubview(imageView)
         imageView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
