@@ -21,15 +21,15 @@ public class WaveformImageRenderOperation: RenderOperation {
     
     // MARK: Private properties
     private var _sourceSamples: [Float]?
-    private var completionHandler: ((_ waveformImage: UIImage?) -> ())?
-    private var outputImage: UIImage?
+    private var completionHandler: ((_ images: [UIImage]?) -> ())?
+    private var outputImages: [UIImage]?
     
     /// Makes sure we always look at the same samples while animating
     public var lastOffset: Int = 0
     
     public init(sourceSamples: [Float]? = nil,
                 configuration: Waveform.Configuration,
-                completionHandler: ((_ waveformImage: UIImage?) -> ())?) {
+                completionHandler: ((_ images: [UIImage]?) -> ())?) {
         self._sourceSamples = sourceSamples
         self.configuration = configuration
         self.completionHandler = completionHandler
@@ -38,7 +38,7 @@ public class WaveformImageRenderOperation: RenderOperation {
     public init(sourceSamples: [Float]? = nil,
                 configuration: Waveform.Configuration,
                 index: Int,
-                completionHandler: ((_ waveformImage: UIImage?) -> ())?) {
+                completionHandler: ((_ images: [UIImage]?) -> ())?) {
         self._sourceSamples = sourceSamples
         self.configuration = configuration
         self.completionHandler = completionHandler
@@ -53,8 +53,12 @@ public class WaveformImageRenderOperation: RenderOperation {
         guard let samples = sourceSamples else {
             return
         }
-        outputImage = render(samples: samples, with: configuration)
-        completionHandler?(outputImage)
+        if let image = render(samples: samples, with: configuration) {
+            outputImages = [image]
+        } else {
+            outputImages = nil
+        }
+        completionHandler?(outputImages)
     }
     
     /// Renders a UIImage of the provided waveform samples.
@@ -116,9 +120,12 @@ private extension WaveformImageRenderOperation {
     
     private func render(samples: [Float],
                         with configuration: Waveform.Configuration,
-                        completionHandler: @escaping (_ waveformImage: UIImage?) -> ()){
-        let image = render(samples: samples, with: configuration)
-        completionHandler(image)
+                        completionHandler: @escaping (_ images: [UIImage]?) -> ()){
+        if let image = render(samples: samples, with: configuration) {
+            completionHandler([image])
+        } else {
+            completionHandler(nil)
+        }
     }
     
     private func render(samples: [Float],
@@ -228,8 +235,8 @@ private extension WaveformImageRenderOperation {
 // MARK: - ImageRenderOutputPass
 
 extension WaveformImageRenderOperation: ImageRenderOutputPass {
-    var image: UIImage? {
-        return outputImage
+    var images: [UIImage]? {
+        return outputImages
     }
 }
 
@@ -243,7 +250,7 @@ extension WaveformImageRenderOperation: NSCopying {
                                                 configuration: self.configuration,
                                                 completionHandler: self.completionHandler)
         copy.index = self.index
-        copy.outputImage = self.outputImage
+        copy.outputImages = self.outputImages
         return copy
     }
     

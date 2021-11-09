@@ -11,9 +11,14 @@ import UIKit
 
 /// Base class for rendering long image over collection view
 class RenderCollectionView: UIView {
+    
+    // MARK: Type of rendering for cell
+    enum ImageRenderType {
+        case single     // single image on cell
+        case multi      // multi images on cell
+    }
  
     // MARK: Public Properties
-//    var renderProvider: RenderCollectionProvider = WaveformCollectionProvider(qos: .userInitiated)
     var renderProvider: RenderCollectionProvider?
     var flowLayout = UICollectionViewFlowLayout()
     var collectionView: UICollectionView!
@@ -21,13 +26,13 @@ class RenderCollectionView: UIView {
                                                                            itemsWidth: [])
     var totalWidth: CGFloat = 0
     var itemWidth: CGFloat = 0
+    var renderType: ImageRenderType = .single
     
     var contentOffset: CGPoint = .zero
     var isChunkGenerationEnable: Bool = true    // флаг, генерировать ли содержимое всех ячеек сразу или по отдельности
                                                 // Если генерируем содержимое ячеек по отдельности, то "окно" из  collectionView будет занимать размер 3 ячеек
                                                 // (для того, чтобы при скроллинге запрос на отображение новых ячеек проходил заранее)
     
-    var cellReuseIdentifier = "cellReuseIdentifier"
     private var currentFrame = CGRect.zero
 
 
@@ -69,7 +74,8 @@ class RenderCollectionView: UIView {
     // MARK: Public Methods
     
     func configure(totalWidth: CGFloat,
-                   itemWidth: CGFloat) {
+                   itemWidth: CGFloat,
+                   renderType: ImageRenderType) {
         
         let itemsWidth = WaveformSupport.devideSegment(segmentWidth: totalWidth,
                                                        itemWidth: itemWidth)
@@ -77,13 +83,19 @@ class RenderCollectionView: UIView {
                                                                            itemsWidth: itemsWidth)
         self.totalWidth = totalWidth
         self.itemWidth = itemWidth
+        self.renderType = renderType
         
         updateCollectionViewContentOffset()
     }
     
-    func requestImageForIndexPath(_ indexPath: IndexPath) {
-        guard let cell = collectionView.cellForItem(at: indexPath) as? RenderImageCell else { return }
-        requestImageForCell(cell, indexPath: indexPath)
+    func requestSingleImageForIndexPath(_ indexPath: IndexPath) {
+        guard let cell = collectionView.cellForItem(at: indexPath) as? RenderSingleImageCell else { return }
+        requestSingleImageForCell(cell, indexPath: indexPath)
+    }
+    
+    func requestMultiImagesForIndexPath(_ indexPath: IndexPath) {
+        guard let cell = collectionView.cellForItem(at: indexPath) as? RenderMultiImagesCell else { return }
+        requestMultiImagesForCell(cell, indexPath: indexPath)
     }
     
     /// Setup current offset inside cell
@@ -118,7 +130,8 @@ class RenderCollectionView: UIView {
         
         collectionView.dataSource = self
         collectionView.delegate = self
-        collectionView.register(RenderImageCell.self, forCellWithReuseIdentifier: cellReuseIdentifier)
+        collectionView.register(RenderSingleImageCell.self, forCellWithReuseIdentifier: cellIdentifier(for: RenderSingleImageCell.self))
+        collectionView.register(RenderMultiImagesCell.self, forCellWithReuseIdentifier: cellIdentifier(for: RenderMultiImagesCell.self))
 
         addSubview(collectionView)
     }
@@ -130,14 +143,28 @@ class RenderCollectionView: UIView {
         return cellSize
     }
     
-    private func requestImageForCell(_ cell: RenderImageCell, indexPath: IndexPath) {
-        renderProvider?.getImage(for: indexPath.row,
-                                    size: getCellSize(for: indexPath)) { image, providerIndex in
-            guard let image = image else { return }
+    private func requestSingleImageForCell(_ cell: RenderSingleImageCell, indexPath: IndexPath) {
+        renderProvider?.getImages(for: indexPath.row,
+                                     size: getCellSize(for: indexPath)) { images, providerIndex in
+            guard let images = images,
+                  let image = images[safeIndex: 0] else { return }
             if providerIndex == cell.indexPath?.row {
                 DispatchQueue.main.async { [weak cell] in
                     guard let cell = cell else { return }
                     cell.updateImage(image)
+                }
+            }
+        }
+    }
+    
+    private func requestMultiImagesForCell(_ cell: RenderMultiImagesCell, indexPath: IndexPath) {
+        renderProvider?.getImages(for: indexPath.row,
+                                     size: getCellSize(for: indexPath)) { images, providerIndex in
+            guard let images = images else { return }
+            if providerIndex == cell.indexPath?.row {
+                DispatchQueue.main.async { [weak cell] in
+                    guard let cell = cell else { return }
+                    cell.updateImages(images)
                 }
             }
         }
@@ -168,6 +195,11 @@ class RenderCollectionView: UIView {
         }
         self.layoutIfNeeded()
     }
+    
+    /// Return cell's identificator for cell type
+    func cellIdentifier(for cellClass: AnyClass) -> String {
+        return String(describing: cellClass)
+    }
 }
 
 
@@ -179,7 +211,16 @@ extension RenderCollectionView: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellReuseIdentifier, for: indexPath) as? RenderImageCell else {
+        var cell: RenderCell?
+        switch renderType {
+        case .single:
+            cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier(for: RenderSingleImageCell.self),
+                                                      for: indexPath) as? RenderSingleImageCell
+        case .multi:
+            cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier(for: RenderMultiImagesCell.self),
+                                                      for: indexPath) as? RenderMultiImagesCell
+        }
+        guard let cell = cell else {
             return UICollectionViewCell()
         }
         cell.indexPath = indexPath
@@ -195,9 +236,16 @@ extension RenderCollectionView: UICollectionViewDelegate {
     }
     
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        guard let cell = cell as? RenderImageCell else { return }
-        cell.indexPath = indexPath
-        requestImageForCell(cell, indexPath: indexPath)
+        switch renderType {
+        case .single:
+            guard let cell = cell as? RenderSingleImageCell else { return }
+            cell.indexPath = indexPath
+            requestSingleImageForCell(cell, indexPath: indexPath)
+        case .multi:
+            guard let cell = cell as? RenderMultiImagesCell else { return }
+            cell.indexPath = indexPath
+            requestMultiImagesForCell(cell, indexPath: indexPath)
+        }
     }
    
     func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {

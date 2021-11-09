@@ -64,7 +64,7 @@ public class WaveformCollectionProvider: RenderCollectionProvider {
     /// Create render operation
     override func createRenderOperation(for index: Int,
                                         size: CGSize,
-                                        completion: ((UIImage?) -> Void)?) -> Operation? {
+                                        completion: (([UIImage]?) -> Void)?) -> Operation? {
         let configuration = waveformConfiguration.with(size: size)
         let renderOperation = WaveformImageRenderOperation(sourceSamples: nil,
                                                            configuration: configuration,

@@ -39,7 +39,13 @@ public class WaveformImageDrawer {
 
         let renderOperation = WaveformImageRenderOperation(sourceSamples: nil,
                                                            configuration: configuration,
-                                                           completionHandler: completionHandler)
+                                                           completionHandler: { images in
+            if let images = images {
+                completionHandler(images[safeIndex: 0])
+            } else {
+                completionHandler(nil)
+            }
+        })
         renderOperation.addDependency(analyzerOperation)
 
         queue.addOperations([analyzerOperation, renderOperation], waitUntilFinished: false)

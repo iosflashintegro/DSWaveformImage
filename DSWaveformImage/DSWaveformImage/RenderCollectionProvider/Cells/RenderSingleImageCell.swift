@@ -1,5 +1,5 @@
 //
-//  RenderImageCell.swift
+//  RenderSingleImageCell.swift
 //  vqVideoeditor
 //
 //  Created by Dmitry Nuzhin on 05.10.2021.
@@ -8,10 +8,8 @@
 
 import UIKit
 
-/// Base cell class used for rendering chunk of long image
-final class RenderImageCell: UICollectionViewCell {
-    // MARK: Public properties
-    var indexPath: IndexPath?
+/// Cell class used for rendering single image on cell
+final class RenderSingleImageCell: RenderCell {
     
     // MARK: Private properties
     private var imageView = UIImageView()
@@ -27,12 +25,12 @@ final class RenderImageCell: UICollectionViewCell {
     }
     
     // MARK: Setup UI
-    private func setupUI() {
+    override func setupUI() {
+        super.setupUI()
         addSubview(imageView)
         imageView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
-        clipsToBounds = true
     }
     
     // MARK: Layout

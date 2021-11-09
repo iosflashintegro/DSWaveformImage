@@ -54,10 +54,10 @@ public class RenderCollectionProvider {
     }
     
     /// Get image for target index
-    public func getImage(for index: Int,
-                         size: CGSize,
-                         completionHandler: ((_ image: UIImage?, _ index: Int) -> ())?) {
-        let completion: (UIImage?) -> Void = { image in
+    public func getImages(for index: Int,
+                          size: CGSize,
+                          completionHandler: ((_ image: [UIImage]?, _ index: Int) -> ())?) {
+        let completion: ([UIImage]?) -> Void = { image in
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else {
                     completionHandler?(nil, index)
@@ -117,7 +117,7 @@ public class RenderCollectionProvider {
     /// - Note: Override on children
     func createRenderOperation(for index: Int,
                                size: CGSize,
-                               completion: ((UIImage?) -> Void)?) -> Operation? {
+                               completion: (([UIImage]?) -> Void)?) -> Operation? {
         return nil
     }
 
