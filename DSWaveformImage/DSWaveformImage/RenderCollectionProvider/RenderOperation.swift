@@ -15,6 +15,6 @@ protocol ImageRenderOutputPass {
 }
 
 /// Base class for image render operation
-public class RenderOperation: Operation {
-    public var index: Int?  // index if operation created on RenderCollection
+public protocol RenderOperation: Operation {
+    var index: Int? { get set }  // index if operation created on RenderCollection
 }

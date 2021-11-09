@@ -2,7 +2,10 @@ import Foundation
 import UIKit
 
 
-public class WaveformImageRenderOperation: RenderOperation {
+public class WaveformImageRenderOperation: Operation, RenderOperation {
+    // MARK: RenderOperation
+    public var index: Int?
+    
     // MARK: Public properties
     public var sourceSamples: [Float]? {
         var samples: [Float]?
