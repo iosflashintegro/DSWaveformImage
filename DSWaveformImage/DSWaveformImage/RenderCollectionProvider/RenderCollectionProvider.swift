@@ -22,6 +22,7 @@ public class RenderCollectionProvider {
 
     public init(qos: QualityOfService = .userInitiated) {
         collectionConfiguration = RenderCollection.CollectionConfiguration(collectionWidth: 0,
+                                                                           collectionHeight: 0,
                                                                            itemsWidth: [])
         self.qos = qos
         queue = OperationQueue()

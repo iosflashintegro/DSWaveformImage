@@ -23,6 +23,7 @@ class RenderCollectionView: UIView {
     var flowLayout = UICollectionViewFlowLayout()
     var collectionView: UICollectionView!
     var collectionConfiguration = RenderCollection.CollectionConfiguration(collectionWidth: 0,
+                                                                           collectionHeight: 0,
                                                                            itemsWidth: [])
     var totalWidth: CGFloat = 0
     var itemWidth: CGFloat = 0
@@ -80,6 +81,7 @@ class RenderCollectionView: UIView {
         let itemsWidth = WaveformSupport.devideSegment(segmentWidth: totalWidth,
                                                        itemWidth: itemWidth)
         collectionConfiguration = RenderCollection.CollectionConfiguration(collectionWidth: totalWidth,
+                                                                           collectionHeight: self.bounds.size.height,
                                                                            itemsWidth: itemsWidth)
         self.totalWidth = totalWidth
         self.itemWidth = itemWidth
