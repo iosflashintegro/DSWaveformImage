@@ -28,9 +28,10 @@ final class RenderSingleImageCell: RenderCell {
     override func setupUI() {
         super.setupUI()
         contentView.addSubview(imageView)
-        imageView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
+
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.widthAnchor.constraint(equalTo: contentView.widthAnchor).isActive = true
+        imageView.heightAnchor.constraint(equalTo: contentView.heightAnchor).isActive = true
     }
     
     // MARK: Layout
