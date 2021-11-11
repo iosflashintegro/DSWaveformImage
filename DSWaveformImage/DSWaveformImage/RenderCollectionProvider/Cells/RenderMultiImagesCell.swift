@@ -45,14 +45,17 @@ final class RenderMultiImagesCell: RenderCell {
         super.layoutSubviews()
     }
     
-    // MARK: CollectionView
-    override func prepareForReuse() {
-        super.prepareForReuse()
+    // MARK: Override methods
+    
+    /// Clear content images
+    override func clearRenderContent() {
+        super.clearRenderContent()
         removeAllImages()
     }
-    
+ 
     // MARK: Public methods
     func updateImages(_ images: [UIImage]) {
+        onRederContentReady()
         self.images = images
         drawImages()
     }
@@ -60,8 +63,6 @@ final class RenderMultiImagesCell: RenderCell {
     // MARK: Private methods
     
     private func drawImages() {
-        removeAllImages()
-        
         let imageCount = images.count
         let imageWidth = (bounds.size.width - 2 * Const.Preview.edgeDistance - Const.Preview.distanceBetwenImages * CGFloat(imageCount - 1)) / CGFloat(imageCount)
         

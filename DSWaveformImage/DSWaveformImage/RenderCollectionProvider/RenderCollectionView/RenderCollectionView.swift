@@ -28,6 +28,7 @@ class RenderCollectionView: UIView {
     var totalWidth: CGFloat = 0
     var itemWidth: CGFloat = 0
     var renderType: ImageRenderType = .single
+    var cellEmptyStyle: RenderCell.EmptyStyle = .empty
     
     var contentOffset: CGPoint = .zero
     var isChunkGenerationEnable: Bool = true    // флаг, генерировать ли содержимое всех ячеек сразу или по отдельности
@@ -76,7 +77,8 @@ class RenderCollectionView: UIView {
     
     func configure(totalWidth: CGFloat,
                    itemWidth: CGFloat,
-                   renderType: ImageRenderType) {
+                   renderType: ImageRenderType,
+                   cellEmptyStyle: RenderCell.EmptyStyle) {
         
         let itemsWidth = WaveformSupport.devideSegment(segmentWidth: totalWidth,
                                                        itemWidth: itemWidth)
@@ -86,6 +88,7 @@ class RenderCollectionView: UIView {
         self.totalWidth = totalWidth
         self.itemWidth = itemWidth
         self.renderType = renderType
+        self.cellEmptyStyle = cellEmptyStyle
         
         updateCollectionViewContentOffset()
     }
@@ -225,6 +228,7 @@ extension RenderCollectionView: UICollectionViewDataSource {
         guard let cell = cell else {
             return UICollectionViewCell()
         }
+        cell.emptyStyle = cellEmptyStyle
         cell.indexPath = indexPath
         return cell
     }
