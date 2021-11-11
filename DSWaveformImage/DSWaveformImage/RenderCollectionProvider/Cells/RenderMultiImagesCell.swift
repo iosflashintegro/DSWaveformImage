@@ -81,13 +81,11 @@ final class RenderMultiImagesCell: RenderCell {
                 let const = item.widthAnchor.constraint(equalToConstant: imageWidth)
                 const.priority = .defaultLow
                 const.isActive = true
-                item.layer.cornerRadius = 3
                 item.clipsToBounds = true
                 item.layer.maskedCorners = [.layerMaxXMinYCorner, .layerMaxXMaxYCorner]
             } else if index == 0 {
                 item.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Const.Preview.blockMargin).isActive = true
                 item.widthAnchor.constraint(equalToConstant: imageWidth).isActive = true
-                item.layer.cornerRadius = 3
                 item.clipsToBounds = true
                 item.layer.maskedCorners = [.layerMinXMinYCorner, .layerMinXMaxYCorner]
             } else if index == images.count - 1 {
@@ -96,7 +94,6 @@ final class RenderMultiImagesCell: RenderCell {
                 let const = item.widthAnchor.constraint(equalToConstant: imageWidth)
                 const.priority = .defaultLow
                 const.isActive = true
-                item.layer.cornerRadius = 3
                 item.clipsToBounds = true
                 item.layer.maskedCorners = [.layerMaxXMinYCorner, .layerMaxXMaxYCorner]
             } else {
