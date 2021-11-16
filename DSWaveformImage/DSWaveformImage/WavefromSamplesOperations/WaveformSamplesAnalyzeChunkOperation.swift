@@ -1,5 +1,5 @@
 //
-//  WaveformCreateChunkOperation.swift
+//  WaveformSamplesAnalyzeChunkOperation.swift
 //  vqVideoeditor
 //
 //  Created by Dmitry Nuzhin on 07.10.2021.
@@ -9,25 +9,31 @@
 import Foundation
 import UIKit
 
-public class WaveformCreateChunkOperation: Operation {
+
+/// Calculates samples devided to chunk from linear samples
+public class WaveformSamplesAnalyzeChunkOperation: Operation {
     private var sourceSamples: [Float]
     private var newSamplesCount: Int = 0
-    private var chunksCount: [Int] = []
-    private var completionHandler: ((_ amplitudes: [[Float]]?, _ updatedChunkIndexes: [Int]?) -> ())?
+    private var duration: TimeInterval = 0
+    private var collectionConfiguration: RenderCollection.CollectionConfiguration
+    private var completionHandler: ((_ amplitudes: [[Float]]?, _ updatedChunkIndexes: [Int]?, _ ranges: [RenderCollection.SamplesTimeRange]?) -> ())?
     
+    private var outputTimeRanges: [RenderCollection.SamplesTimeRange]?
     private var outputChunkAmplitudes: [[Float]]?
 
-    /// - Parameter sourceSamples: media file url.
+    /// - Parameter sourceSamples: all samples
     /// - Parameter chunksCount - amount of samples on each chunks
     /// - Parameter newSamplesCount: amount updated samples in sourceSamples (compared with previous request)
     /// - Parameter completionHandler: called from a background thread. Returns (the sampled result and index of updated chunk)  or nil in edge-error cases.
     public init(sourceSamples: [Float],
                 newSamplesCount: Int,
-                chunksCount: [Int],
-                completionHandler: ((_ amplitudes: [[Float]]?, _ updatedChunkIndexes: [Int]?) -> ())?) {
+                duration: TimeInterval,
+                collectionConfiguration: RenderCollection.CollectionConfiguration,
+                completionHandler: ((_ amplitudes: [[Float]]?, _ updatedChunkIndexes: [Int]?, _ ranges: [RenderCollection.SamplesTimeRange]?) -> ())?) {
         self.sourceSamples = sourceSamples
         self.newSamplesCount = newSamplesCount
-        self.chunksCount = chunksCount
+        self.duration = duration
+        self.collectionConfiguration = collectionConfiguration
         self.completionHandler = completionHandler
     }
     
@@ -36,8 +42,10 @@ public class WaveformCreateChunkOperation: Operation {
             return
         }
         
+        let chunksCount = collectionConfiguration.itemsWidth.map { Int($0) }
+        
         if sourceSamples.count == 0 || chunksCount.count == 0 {
-            completionHandler?(nil, nil)
+            completionHandler?(nil, nil, nil)
             return
         }
         
@@ -47,7 +55,11 @@ public class WaveformCreateChunkOperation: Operation {
         }
         outputChunkAmplitudes = sourceSamples.chunked(elementCounts: chunksCount)
         let updatedChunkIndexes = chunkIndexesForUpdatedSamles(count: newSamplesCount)
-        completionHandler?(outputChunkAmplitudes, updatedChunkIndexes)
+        
+        let timeRange: ClosedRange<TimeInterval> = 0...duration
+        outputTimeRanges = RenderCollection.createSamplesRanges(timeRange: timeRange,
+                                                                collectionConfiguration: collectionConfiguration)
+        completionHandler?(outputChunkAmplitudes, updatedChunkIndexes, outputTimeRanges)
     }
     
     /// - Returns: Indexes of chunk for updated new samples
@@ -89,8 +101,18 @@ public class WaveformCreateChunkOperation: Operation {
     }
 }
 
-extension WaveformCreateChunkOperation: WaveformAnalyzerChunkOutputPass {
+
+// MARK: WaveformSamplesAnalyzerChunkOutputPass
+extension WaveformSamplesAnalyzeChunkOperation: WaveformSamplesAnalyzerChunkOutputPass {
     public var chunkAmplitudes: [[Float]]? {
         return outputChunkAmplitudes
+    }
+}
+
+
+// MARK: WaveformTimeRangeAnalyzerOutputPass
+extension WaveformSamplesAnalyzeChunkOperation: WaveformTimeRangeAnalyzerOutputPass {
+    public var samplesTimeRanges: [RenderCollection.SamplesTimeRange]? {
+        return outputTimeRanges
     }
 }

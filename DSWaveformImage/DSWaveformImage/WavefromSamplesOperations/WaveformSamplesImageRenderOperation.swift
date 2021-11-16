@@ -2,7 +2,8 @@ import Foundation
 import UIKit
 
 
-public class WaveformImageRenderOperation: Operation, RenderOperation {
+/// Render waveform image from samples
+public class WaveformSamplesImageRenderOperation: Operation, RenderOperation {
     // MARK: RenderOperation
     public var index: Int?
     
@@ -12,8 +13,8 @@ public class WaveformImageRenderOperation: Operation, RenderOperation {
         if let sourceSamples = _sourceSamples {
             samples = sourceSamples
         } else if let dataProvider = dependencies
-                    .filter({ $0 is WaveformAnalyzerChunkOutputPass })
-                    .first as? WaveformAnalyzerChunkOutputPass {
+                    .filter({ $0 is WaveformSamplesAnalyzerChunkOutputPass })
+                    .first as? WaveformSamplesAnalyzerChunkOutputPass {
             let index = index ?? 0
             samples = dataProvider.chunkAmplitudes?[safeIndex: index]
         }
@@ -119,7 +120,7 @@ public class WaveformImageRenderOperation: Operation, RenderOperation {
 
 // MARK: Image generation
 
-private extension WaveformImageRenderOperation {
+private extension WaveformSamplesImageRenderOperation {
     
     private func render(samples: [Float],
                         with configuration: Waveform.Configuration,
@@ -211,7 +212,7 @@ private extension WaveformImageRenderOperation {
 
 // MARK: - Helpers
 
-private extension WaveformImageRenderOperation {
+private extension WaveformSamplesImageRenderOperation {
     private func stripeCount(_ configuration: Waveform.Configuration) -> Int {
         if case .striped = configuration.style {
             return Int(configuration.size.width * configuration.scale) / stripeBucket(configuration)
@@ -237,7 +238,7 @@ private extension WaveformImageRenderOperation {
 
 // MARK: - ImageRenderOutputPass
 
-extension WaveformImageRenderOperation: ImageRenderOutputPass {
+extension WaveformSamplesImageRenderOperation: ImageRenderOutputPass {
     var images: [UIImage]? {
         return outputImages
     }
@@ -246,12 +247,12 @@ extension WaveformImageRenderOperation: ImageRenderOutputPass {
 
 // MARK: - NSCopying
 
-extension WaveformImageRenderOperation: NSCopying {
+extension WaveformSamplesImageRenderOperation: NSCopying {
     
     public func copy(with zone: NSZone? = nil) -> Any {
-        let copy = WaveformImageRenderOperation(sourceSamples: self._sourceSamples,
-                                                configuration: self.configuration,
-                                                completionHandler: self.completionHandler)
+        let copy = WaveformSamplesImageRenderOperation(sourceSamples: self._sourceSamples,
+                                                       configuration: self.configuration,
+                                                       completionHandler: self.completionHandler)
         copy.index = self.index
         copy.outputImages = self.outputImages
         return copy

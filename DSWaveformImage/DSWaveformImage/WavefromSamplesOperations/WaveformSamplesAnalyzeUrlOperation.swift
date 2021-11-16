@@ -11,17 +11,17 @@ import Foundation
 import Accelerate
 import AVFoundation
 
-public protocol WaveformAnalyzerLinearOutputPass {
+public protocol WaveformSamplesAnalyzerLinearOutputPass {
     var linearAmplitudes: [Float]? { get }
 }
 
-public protocol WaveformAnalyzerChunkOutputPass: Operation {
+public protocol WaveformSamplesAnalyzerChunkOutputPass: Operation {
     var chunkAmplitudes: [[Float]]? { get }
 }
 
 
-/// Calculates the waveform of the initialized asset URL.
-public class WaveformAnalyzerOperation: AsyncOperation {
+/// Calculates samples from URL.
+public class WaveformSamplesAnalyzeUrlOperation: AsyncOperation {
     
     fileprivate struct WaveformAnalysis {
         let amplitudes: [Float]
@@ -124,7 +124,7 @@ public class WaveformAnalyzerOperation: AsyncOperation {
 
 // MARK: - Private
 
-fileprivate extension WaveformAnalyzerOperation {
+fileprivate extension WaveformSamplesAnalyzeUrlOperation {
     func waveformSamples(count requiredNumberOfSamples: Int,
                          fftBands: Int?,
                          completionHandler: @escaping (_ analysis: WaveformAnalysis?) -> ()) {
@@ -323,7 +323,7 @@ fileprivate extension WaveformAnalyzerOperation {
 
 // MARK: - Configuration
 
-private extension WaveformAnalyzerOperation {
+private extension WaveformSamplesAnalyzeUrlOperation {
     private func outputSettings() -> [String: Any] {
         return [
             AVFormatIDKey: kAudioFormatLinearPCM,
@@ -335,17 +335,17 @@ private extension WaveformAnalyzerOperation {
     }
 }
 
-// MARK: - WaveformAnalyzerLinearOutputPass
+// MARK: - WaveformSamplesAnalyzerLinearOutputPass
 
-extension WaveformAnalyzerOperation: WaveformAnalyzerLinearOutputPass {
+extension WaveformSamplesAnalyzeUrlOperation: WaveformSamplesAnalyzerLinearOutputPass {
     public var linearAmplitudes: [Float]? {
         return outputLinearAmplitudes
     }
 }
 
-// MARK: - WaveformAnalyzerChunkOutputPass
+// MARK: - WaveformSamplesAnalyzerChunkOutputPass
 
-extension WaveformAnalyzerOperation: WaveformAnalyzerChunkOutputPass {
+extension WaveformSamplesAnalyzeUrlOperation: WaveformSamplesAnalyzerChunkOutputPass {
     public var chunkAmplitudes: [[Float]]? {
         return outputChunkAmplitudes
     }

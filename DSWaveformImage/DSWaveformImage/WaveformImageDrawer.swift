@@ -33,13 +33,13 @@ public class WaveformImageDrawer {
         cancelWaveformGeneration()
         
         let sampleCount = Int(configuration.size.width * configuration.scale)
-        let analyzerOperation = WaveformAnalyzerOperation(audioAssetURL: audioAssetURL,
-                                                          count: sampleCount,
-                                                          completionHandler: nil)
+        let analyzerOperation = WaveformSamplesAnalyzeUrlOperation(audioAssetURL: audioAssetURL,
+                                                                   count: sampleCount,
+                                                                   completionHandler: nil)
 
-        let renderOperation = WaveformImageRenderOperation(sourceSamples: nil,
-                                                           configuration: configuration,
-                                                           completionHandler: { images in
+        let renderOperation = WaveformSamplesImageRenderOperation(sourceSamples: nil,
+                                                                  configuration: configuration,
+                                                                  completionHandler: { images in
             if let images = images {
                 completionHandler(images[safeIndex: 0])
             } else {
@@ -67,12 +67,12 @@ extension WaveformImageDrawer {
     /// Samples need to be normalized within interval `(0...1)`.
     /// Ensure context size & scale match with the configuration's size & scale.
     func draw(waveform samples: [Float], newSampleCount: Int, on context: CGContext, with configuration: Waveform.Configuration) {
-        let renderOperation = WaveformLiveImageRenderOperation(sourceSamples: samples,
-                                                               newSampleCount: newSampleCount,
-                                                               configuration: configuration,
-                                                               context: context,
-                                                               lastOffset: lastOffset,
-                                                               shouldDrawSilencePadding: shouldDrawSilencePadding)
+        let renderOperation = WaveformSamplesImageContextRenderOperation(sourceSamples: samples,
+                                                                         newSampleCount: newSampleCount,
+                                                                         configuration: configuration,
+                                                                         context: context,
+                                                                         lastOffset: lastOffset,
+                                                                         shouldDrawSilencePadding: shouldDrawSilencePadding)
         lastOffset = renderOperation.draw() // start on called thread
     }
 }

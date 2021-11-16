@@ -37,4 +37,36 @@ public enum RenderCollection {
                                            itemsWidth: itemsWidth ?? self.itemsWidth)
         }
     }
+    
+    
+    /// Range of track interval & samples count on that range
+    public struct SamplesTimeRange {
+        let startTime: TimeInterval // url start interval
+        let endTime: TimeInterval   // url end interval
+        let samplesCount: Int       // samples count for generate at interval
+    }
+    
+    
+    /// Create array of SamplesTimeRange for target timeRange & CollectionConfiguration
+    static func createSamplesRanges(timeRange: ClosedRange<TimeInterval>,
+                                    collectionConfiguration: CollectionConfiguration) -> [SamplesTimeRange]? {
+        // proportions for each collectionWidth
+        let proportionallyParts = collectionConfiguration.itemsWidth.map { Double($0 / collectionConfiguration.collectionWidth) }
+        let chunkTimeRanges = ClosedRange<TimeInterval>.split(sourceRange: timeRange, proportionallyParts: proportionallyParts)
+        
+        if chunkTimeRanges.count != collectionConfiguration.itemsWidth.count {
+            return nil
+        }
+
+        var samplesRanges: [SamplesTimeRange] = []
+        for (index, chunkTimeRange) in chunkTimeRanges.enumerated() {
+            let samplesCount = Int(collectionConfiguration.itemsWidth[index])
+            let samplesRange = SamplesTimeRange(startTime: chunkTimeRange.lowerBound,
+                                                endTime: chunkTimeRange.upperBound,
+                                                samplesCount: samplesCount)
+            samplesRanges.append(samplesRange)
+        }
+        return samplesRanges
+
+    }
 }

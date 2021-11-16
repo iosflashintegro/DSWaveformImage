@@ -1,5 +1,5 @@
 //
-//  WaveformLiveImageRenderOperation.swift
+//  WaveformSamplesImageContextRenderOperation.swift
 //  DSWaveformImage
 //
 //  Created by Dmitry Nuzhin on 27.09.2021.
@@ -9,7 +9,8 @@
 import Foundation
 import UIKit
 
-class WaveformLiveImageRenderOperation: WaveformImageRenderOperation {
+/// Render waveform image from samples, draw on context
+class WaveformSamplesImageContextRenderOperation: WaveformSamplesImageRenderOperation {
     // MARK: Private properties
     private var sourceContext: CGContext?
     private var newSampleCount: Int = 0
