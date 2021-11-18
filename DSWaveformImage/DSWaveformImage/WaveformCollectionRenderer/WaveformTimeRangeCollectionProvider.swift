@@ -11,15 +11,29 @@ import UIKit
 
 /// Provider for waveform created from URL
 public class WaveformTimeRangeCollectionProvider: RenderCollectionProvider {
+    
+    // MARK: Static
+    
+    private static var _sharedQueue: OperationQueue?
+    override class var sharedQueue: OperationQueue? {
+        get {
+            return _sharedQueue
+        }
+        set {
+            _sharedQueue = newValue
+        }
+    }
+    
+    // MARK: Instance
 
     private var url: URL?
     private var waveformConfiguration: Waveform.Configuration
     
     private var samplesTimeRanges: [RenderCollection.SamplesTimeRange] = []  // параметры интервалов для каждой из ячеек
     
-    public override init(qos: QualityOfService = .userInitiated) {
+    public override init(qos: QualityOfService = .userInitiated, shared: Bool = false) {
         waveformConfiguration = Waveform.Configuration()
-        super.init(qos: qos)
+        super.init(qos: qos, shared: shared)
     }
     
     /// Analyze audio from url & load all samples

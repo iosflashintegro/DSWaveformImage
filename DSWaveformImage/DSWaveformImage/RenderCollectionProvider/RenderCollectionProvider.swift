@@ -12,28 +12,70 @@ import UIKit
 /// Base provider class for rendering any object devided into chunks.
 public class RenderCollectionProvider {
     
+    // MARK: Static
+    
+    private static var _sharedQueue: OperationQueue?
+    // sharedQueue will be overrided on subclasses for has access to private _sharedQueue, uniqued for each subclass
+    class var sharedQueue: OperationQueue? {
+        get {
+            return _sharedQueue
+        }
+        set {
+            _sharedQueue = newValue
+        }
+    }
+    
+    /// Get sharedQueue
+    class func getSharedQueue(qos: QualityOfService = .userInitiated) -> OperationQueue {
+        if let queue = sharedQueue {
+            return queue
+        } else {
+            let queue = createSharedQueue(qos: qos)
+            sharedQueue = queue
+            return queue
+        }
+    }
+    
+    /// Creatae queue for rendering, shared between all instance of current class
+    class func createSharedQueue(qos: QualityOfService = .userInitiated) -> OperationQueue {
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = 1
+        queue.qualityOfService = qos
+        
+        let className = String(describing: self)
+        let queueName = className + "_Shared_" + NSUUID().uuidString
+        queue.name = queueName
+        
+        return queue
+    }
+    
+    
+    // MARK: Instance properties
+    
     var analyzerOperation: Operation?
     var renderOperations: [Int: Operation] = [:]     // render operations. key - index
     
-    var qos: QualityOfService
     var collectionConfiguration: RenderCollection.CollectionConfiguration
+    var queue: OperationQueue?
+    
+    // MARK: Constructor/Destructor/Init
 
-    var queue: OperationQueue
-
-    public init(qos: QualityOfService = .userInitiated) {
+    public init(qos: QualityOfService = .userInitiated, shared: Bool = false) {
         collectionConfiguration = RenderCollection.CollectionConfiguration(collectionWidth: 0,
                                                                            collectionHeight: 0,
                                                                            itemsWidth: [])
-        self.qos = qos
-        queue = OperationQueue()
-        queue.maxConcurrentOperationCount = 1
-        queue.qualityOfService = qos
-        queue.name = "RenderCollectionProvider_" + NSUUID().uuidString
+        if shared {
+            queue = type(of: self).getSharedQueue(qos: qos)
+        } else {
+            queue = createInstanceQueue(qos: qos)
+        }
     }
     
     deinit {
         cancelAllRendering()
     }
+    
+    // MARK: Public methods
 
     /// Any actions on recreate analyserOperation
     func prepareAnalyzerOperation(_ anAnalyzerOperation: Operation) {
@@ -42,14 +84,14 @@ public class RenderCollectionProvider {
         // cancel all exist operations
         cancelAllRendering()
         // add analyzer oparation to queue
-        queue.addOperation(anAnalyzerOperation)
+        queue?.addOperation(anAnalyzerOperation)
         analyzerOperation = anAnalyzerOperation
         // if exist, add prev render operation
         udpatedRenderOperations.forEach {
             if let index = $0.index {
                 renderOperations[index] = $0
             }
-            queue.addOperation($0)
+            queue?.addOperation($0)
         }
         // Later, if new renderOperation will be created for exist index, current active operation will cancelled - it's correct
     }
@@ -91,13 +133,14 @@ public class RenderCollectionProvider {
         
         renderOperation.addDependency(analyzerOperation)
         renderOperations[index] = renderOperation
-        queue.addOperations([renderOperation], waitUntilFinished: false)
+        queue?.addOperations([renderOperation], waitUntilFinished: false)
     }
    
     /// Cancel all operations
     public func cancelAllRendering() {
-        queue.cancelAllOperations()
+        analyzerOperation?.cancel()
         analyzerOperation = nil
+        renderOperations.values.forEach { $0.cancel() }
         renderOperations.removeAll()
     }
     
@@ -110,7 +153,7 @@ public class RenderCollectionProvider {
     }
     
     public func activeOperationsCount() -> Int {
-        return queue.operationCount
+        return renderOperations.count + ((analyzerOperation != nil) ? 1: 0)
     }
     
     
@@ -122,6 +165,8 @@ public class RenderCollectionProvider {
         return nil
     }
 
+    
+    // MARK: Private methods
     
     /// Recreate RenderOperation (if exist) and set dependency for its to newAnalyzerOperation
     private func updateDependendentRenderOperation(_ newAnalyzerOperation: Operation) -> [RenderOperation] {
@@ -138,5 +183,18 @@ public class RenderCollectionProvider {
             $0.removeDependency(existAnalyzerOperation)
         }
         return copiedOperations
+    }
+    
+    /// Creatae queue for rendering, only for single instance of class
+    private func createInstanceQueue(qos: QualityOfService = .userInitiated) -> OperationQueue {
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = 1
+        queue.qualityOfService = qos
+        
+        let className = String(describing: self)
+        let queueName = className + NSUUID().uuidString
+        queue.name = queueName
+        
+        return queue
     }
 }

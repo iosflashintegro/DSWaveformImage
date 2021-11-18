@@ -11,16 +11,30 @@ import UIKit
 
 /// Provider for waveform created from samples
 public class WaveformSamplesCollectionProvider: RenderCollectionProvider {
-
+    
+    // MARK: Static
+    
+    private static var _sharedQueue: OperationQueue?
+    override class var sharedQueue: OperationQueue? {
+        get {
+            return _sharedQueue
+        }
+        set {
+            _sharedQueue = newValue
+        }
+    }
+    
+    // MARK: Instance
+    
     private var url: URL?
     private var waveformConfiguration: Waveform.Configuration
     
     private var samplesTimeRanges: [RenderCollection.SamplesTimeRange] = []  // параметры интервалов для каждой из ячеек
     private var samples: [[Float]] = []
     
-    public override init(qos: QualityOfService = .userInitiated) {
+    public override init(qos: QualityOfService = .userInitiated, shared: Bool = false) {
         waveformConfiguration = Waveform.Configuration()
-        super.init(qos: qos)
+        super.init(qos: qos, shared: shared)
     }
     
     /// Prepare array of samples
