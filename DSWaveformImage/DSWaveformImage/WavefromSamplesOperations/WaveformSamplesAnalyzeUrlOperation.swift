@@ -152,7 +152,7 @@ fileprivate extension WaveformSamplesAnalyzeUrlOperation {
                 case .completed:
                     completionHandler(analysis)
                 default:
-                    print("ERROR: reading waveform audio data has failed \(self.assetReader.status)")
+                    print("ERROR: reading waveform audio data has failed \(self.assetReader.status.rawValue)")
                     completionHandler(nil)
                 }
             case .failed, .cancelled, .loading, .unknown:

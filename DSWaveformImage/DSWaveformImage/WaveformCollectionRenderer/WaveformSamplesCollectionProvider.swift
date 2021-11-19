@@ -29,8 +29,7 @@ public class WaveformSamplesCollectionProvider: RenderCollectionProvider {
     private var url: URL?
     private var waveformConfiguration: Waveform.Configuration
     
-    private var samplesTimeRanges: [RenderCollection.SamplesTimeRange] = []  // параметры интервалов для каждой из ячеек
-    private var samples: [[Float]] = []
+    private var samples: [[Float]]?
     
     public override init(qos: QualityOfService = .userInitiated, shared: Bool = false) {
         waveformConfiguration = Waveform.Configuration()
@@ -49,11 +48,10 @@ public class WaveformSamplesCollectionProvider: RenderCollectionProvider {
         let anAnalyzerOperation = WaveformSamplesAnalyzeChunkOperation(sourceSamples: amplitudes,
                                                                        newSamplesCount: newSamplesCount,
                                                                        duration: duration,
-                                                                       collectionConfiguration: collectionConfiguration) { amplitudes, updatedChunkIndexes, ranges in
+                                                                       collectionConfiguration: collectionConfiguration) { amplitudes, updatedChunkIndexes, _ in
             DispatchQueue.main.async { [weak self] in
-                guard let self = self, let amplitudes = amplitudes, let ranges = ranges else { return }
+                guard let self = self, let amplitudes = amplitudes else { return }
                 self.samples = amplitudes
-                self.samplesTimeRanges = ranges
                 completionHandler?(updatedChunkIndexes)
             }
         }
@@ -62,13 +60,47 @@ public class WaveformSamplesCollectionProvider: RenderCollectionProvider {
     
     /// Create render operation
     override func createRenderOperation(for index: Int,
+                                        renderData: Any?,
                                         size: CGSize,
                                         completion: (([UIImage]?) -> Void)?) -> Operation? {
+        var samplesAtIndex: [Float]?
+        if let aRenderData = renderData {
+            if let aSamplesAtIndex = aRenderData as? Array<Float> {
+                samplesAtIndex = aSamplesAtIndex
+            } else {
+                // in incorrect renderData type
+                return nil
+            }
+        } else {
+            // renderData may be nil
+            samplesAtIndex = nil
+        }
+        
         let configuration = waveformConfiguration.with(size: size)
-        let renderOperation = WaveformSamplesImageRenderOperation(sourceSamples: nil,
+        let renderOperation = WaveformSamplesImageRenderOperation(sourceSamples: samplesAtIndex,
                                                                   configuration: configuration,
                                                                   index: index,
                                                                   completionHandler: completion)
         return renderOperation
+    }
+    
+    /// Invalidate already calculated after finish analyzerOperation data
+    override func invalidateAnalyzeData() {
+        samples = nil
+    }
+    
+    /// Check if analyzed data already exist
+    override func isAnalyzeDataExist() -> Bool {
+        return (samples != nil)
+    }
+    
+    /// Get already calculated analyzed data
+    override func getExistAnalyzeData(index: Int) -> Any? {
+        return samples?[safeIndex: index]
+    }
+    
+    /// Get analyzed data from finished operation
+    override func getAnalyzeData(operation: Operation, index: Int) -> Any? {
+        return (operation as? WaveformSamplesAnalyzerChunkOutputPass)?.chunkAmplitudes?[safeIndex: index]
     }
 }

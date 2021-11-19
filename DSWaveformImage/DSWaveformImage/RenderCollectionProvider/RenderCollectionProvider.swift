@@ -12,6 +12,59 @@ import UIKit
 /// Base provider class for rendering any object devided into chunks.
 public class RenderCollectionProvider {
     
+    // MARK: Enum
+    
+    /// Source for rendering data
+    enum RenderSource: CustomStringConvertible {
+        
+        case activeOperation            // wait active analyze operation
+        case finishedOperation(Any)     // get data from already finished analyze operation
+        case existData(Any)             // data for rendering alrady exist
+        case notSource
+        
+        // simple compare (only compare state, without underlying operation
+        static func ==(lhs: RenderSource, rhs: RenderSource) -> Bool {
+            switch (lhs, rhs) {
+            case (.activeOperation, .activeOperation):
+                return true
+            case (.finishedOperation, .finishedOperation):
+                return true
+            case (.existData, .existData):
+                return true
+            case (.notSource, .notSource):
+                return true
+            default:
+                return false
+            }
+        }
+        
+        func getData() -> Any? {
+            switch self {
+            case .activeOperation:
+                return nil
+            case .finishedOperation(let data):
+                return data
+            case .existData(let data):
+                return data
+            case .notSource:
+                return nil
+            }
+        }
+        
+        var description: String {
+            switch self {
+            case .activeOperation:
+                return "activeOperation"
+            case .finishedOperation:
+                return "finishedOperation"
+            case .existData:
+                return "existData"
+            case .notSource:
+                return "notSource"
+            }
+        }
+    }
+    
     // MARK: Static
     
     private static var _sharedQueue: OperationQueue?
@@ -79,6 +132,7 @@ public class RenderCollectionProvider {
 
     /// Any actions on recreate analyserOperation
     func prepareAnalyzerOperation(_ anAnalyzerOperation: Operation) {
+        invalidateAnalyzeData()     // invalidate previously calculated analyzed data before execute new analyze operation
         // recreate render operations with new dependency (if needed)
         let udpatedRenderOperations = updateDependendentRenderOperation(anAnalyzerOperation)
         // cancel all exist operations
@@ -111,37 +165,60 @@ public class RenderCollectionProvider {
                 completionHandler?(image, index)
             }
         }
-        
-        // if loading samples not called, return nil image
-        guard let analyzerOperation = analyzerOperation else {
-            completion(nil)
-            return
-        }
-        
+
         // let cancel exist render operation
         if let existRenderOperation = renderOperations[index] {
             existRenderOperation.cancel()
             renderOperations[index] = nil
         }
+
+        
+        var renderSource: RenderSource = .notSource
+        if let existData = getExistAnalyzeData(index: index) {
+            renderSource = .existData(existData)
+        }
+        else if let analyzerOperation = analyzerOperation {
+            if analyzerOperation.isFinished {
+                if let renderData = getAnalyzeData(operation: analyzerOperation, index: index) {
+                    renderSource = .finishedOperation(renderData)
+                } else {
+                    renderSource = .notSource
+                }
+            } else {
+                renderSource = .activeOperation
+            }
+        } else {
+            renderSource = .notSource
+        }
+        
+        if renderSource == .notSource {
+            completion(nil)
+            return
+        }
         
         guard let renderOperation = createRenderOperation(for: index,
+                                                             renderData: renderSource.getData(),
                                                              size: size,
                                                              completion: completion) else {
             completion(nil)
             return
         }
         
-        renderOperation.addDependency(analyzerOperation)
+        if renderSource == .activeOperation, let analyzerOperation = analyzerOperation {
+            renderOperation.addDependency(analyzerOperation)
+        }
+
+        // add operation to queue
         renderOperations[index] = renderOperation
         queue?.addOperations([renderOperation], waitUntilFinished: false)
     }
    
     /// Cancel all operations
     public func cancelAllRendering() {
-        analyzerOperation?.cancel()
-        analyzerOperation = nil
         renderOperations.values.forEach { $0.cancel() }
         renderOperations.removeAll()
+        analyzerOperation?.cancel()
+        analyzerOperation = nil
     }
     
     /// Cancel image generation at index
@@ -156,12 +233,35 @@ public class RenderCollectionProvider {
         return renderOperations.count + ((analyzerOperation != nil) ? 1: 0)
     }
     
-    
     /// Create render operation
-    /// - Note: Override on children
+    /// - Note: Override on subclasses
     func createRenderOperation(for index: Int,
+                               renderData: Any?,
                                size: CGSize,
                                completion: (([UIImage]?) -> Void)?) -> Operation? {
+        return nil
+    }
+
+    /// Invalidate already calculated after finish analyzerOperation data
+    /// - Note: Override on subclasses
+    func invalidateAnalyzeData() {
+    }
+    
+    /// Check if analyzed data already exist
+    /// - Note: Override on subclasses
+    func isAnalyzeDataExist() -> Bool {
+        return false
+    }
+    
+    /// Get already calculated analyzed data
+    /// - Note: Override on subclasses
+    func getExistAnalyzeData(index: Int) -> Any? {
+        return nil
+    }
+    
+    /// Get analyzed data from finished operation
+    /// - Note: Override on subclasses
+    func getAnalyzeData(operation: Operation, index: Int) -> Any? {
         return nil
     }
 

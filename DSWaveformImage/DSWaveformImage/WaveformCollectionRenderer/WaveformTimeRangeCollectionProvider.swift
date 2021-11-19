@@ -29,7 +29,7 @@ public class WaveformTimeRangeCollectionProvider: RenderCollectionProvider {
     private var url: URL?
     private var waveformConfiguration: Waveform.Configuration
     
-    private var samplesTimeRanges: [RenderCollection.SamplesTimeRange] = []  // параметры интервалов для каждой из ячеек
+    private var samplesTimeRanges: [RenderCollection.SamplesTimeRange]? // параметры интервалов для каждой из ячеек
     
     public override init(qos: QualityOfService = .userInitiated, shared: Bool = false) {
         waveformConfiguration = Waveform.Configuration()
@@ -58,15 +58,50 @@ public class WaveformTimeRangeCollectionProvider: RenderCollectionProvider {
     
     /// Create render operation
     override func createRenderOperation(for index: Int,
+                                        renderData: Any?,
                                         size: CGSize,
                                         completion: (([UIImage]?) -> Void)?) -> Operation? {
         guard let url = url else { return nil }
+        var samplesTimeRange: RenderCollection.SamplesTimeRange?
+        if let aRenderData = renderData {
+            if let timeRange = aRenderData as? RenderCollection.SamplesTimeRange {
+                samplesTimeRange = timeRange
+            } else {
+                // in incorrect renderData type
+                return nil
+            }
+        } else {
+            // renderData may be nil
+            samplesTimeRange = nil
+        }
+  
         let configuration = waveformConfiguration.with(size: size)
         let renderOperation = WaveformTimeRangeImageRenderOperation(url: url,
-                                                                    samplesTimeRange: nil,
+                                                                    samplesTimeRange: samplesTimeRange,
                                                                     waveformConfiguration: configuration,
                                                                     index: index,
                                                                     completionHandler: completion)
         return renderOperation
     }
+    
+    /// Invalidate already calculated after finish analyzerOperation data
+    override func invalidateAnalyzeData() {
+        samplesTimeRanges = nil
+    }
+    
+    /// Check if analyzed data already exist
+    override func isAnalyzeDataExist() -> Bool {
+        return (samplesTimeRanges != nil)
+    }
+    
+    /// Get already calculated analyzed data
+    override func getExistAnalyzeData(index: Int) -> Any? {
+        return samplesTimeRanges?[safeIndex: index]
+    }
+    
+    /// Get analyzed data from finished operation
+    override func getAnalyzeData(operation: Operation, index: Int) -> Any? {
+        return (operation as? WaveformTimeRangeAnalyzerOperation)?.samplesTimeRanges?[safeIndex: index]
+    }
+
 }
