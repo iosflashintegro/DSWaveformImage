@@ -78,29 +78,20 @@ final class RenderMultiImagesCell: RenderCell {
 
             if index == 0 && images.count == 1 {
                 item.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Const.Preview.blockMargin).isActive = true
-                item.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -Const.Preview.blockMargin).isActive = true
-                let const = item.widthAnchor.constraint(equalToConstant: imageWidth)
-                const.priority = .defaultLow
-                const.isActive = true
-                item.clipsToBounds = true
+                item.widthAnchor.constraint(equalToConstant: imageWidth).isActive = true
                 item.layer.maskedCorners = [.layerMaxXMinYCorner, .layerMaxXMaxYCorner]
             } else if index == 0 {
                 item.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Const.Preview.blockMargin).isActive = true
                 item.widthAnchor.constraint(equalToConstant: imageWidth).isActive = true
-                item.clipsToBounds = true
                 item.layer.maskedCorners = [.layerMinXMinYCorner, .layerMinXMaxYCorner]
             } else if index == images.count - 1 {
                 item.leadingAnchor.constraint(equalTo: imageViews[index - 1].trailingAnchor, constant: Const.Preview.distanceBetwenImages).isActive = true
-                item.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -Const.Preview.blockMargin).isActive = true
-                let const = item.widthAnchor.constraint(equalToConstant: imageWidth)
-                const.priority = .defaultLow
-                const.isActive = true
-                item.clipsToBounds = true
+                item.widthAnchor.constraint(equalToConstant: imageWidth).isActive = true
                 item.layer.maskedCorners = [.layerMaxXMinYCorner, .layerMaxXMaxYCorner]
             } else {
-                item.widthAnchor.constraint(equalToConstant: imageWidth).isActive = true
                 item.leadingAnchor.constraint(equalTo: imageViews[index - 1].trailingAnchor, constant: Const.Preview.distanceBetwenImages).isActive = true
-            }
+                item.widthAnchor.constraint(equalToConstant: imageWidth).isActive = true
+             }
 
             item.topAnchor.constraint(equalTo: topAnchor).isActive = true
             item.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
