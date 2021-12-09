@@ -25,6 +25,7 @@ public class WaveformSamplesImageRenderOperation: Operation, RenderOperation {
     
     // MARK: Private properties
     private var _sourceSamples: [Float]?
+    private var loadDataDispatchQueue: DispatchQueue
     private var completionHandler: ((_ images: [UIImage]?) -> ())?
     private var outputImages: [UIImage]?
     
@@ -33,18 +34,22 @@ public class WaveformSamplesImageRenderOperation: Operation, RenderOperation {
     
     public init(sourceSamples: [Float]? = nil,
                 configuration: Waveform.Configuration,
+                loadDataDispatchQueue: DispatchQueue,
                 completionHandler: ((_ images: [UIImage]?) -> ())?) {
         self._sourceSamples = sourceSamples
         self.configuration = configuration
+        self.loadDataDispatchQueue = loadDataDispatchQueue
         self.completionHandler = completionHandler
     }
     
     public init(sourceSamples: [Float]? = nil,
                 configuration: Waveform.Configuration,
                 index: Int,
+                loadDataDispatchQueue: DispatchQueue,
                 completionHandler: ((_ images: [UIImage]?) -> ())?) {
         self._sourceSamples = sourceSamples
         self.configuration = configuration
+        self.loadDataDispatchQueue = loadDataDispatchQueue
         self.completionHandler = completionHandler
         super.init()
         self.index = index
@@ -252,6 +257,7 @@ extension WaveformSamplesImageRenderOperation: NSCopying {
     public func copy(with zone: NSZone? = nil) -> Any {
         let copy = WaveformSamplesImageRenderOperation(sourceSamples: self._sourceSamples,
                                                        configuration: self.configuration,
+                                                       loadDataDispatchQueue: self.loadDataDispatchQueue,
                                                        completionHandler: self.completionHandler)
         copy.index = self.index
         copy.outputImages = self.outputImages

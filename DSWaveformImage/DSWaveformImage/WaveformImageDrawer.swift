@@ -39,6 +39,7 @@ public class WaveformImageDrawer {
 
         let renderOperation = WaveformSamplesImageRenderOperation(sourceSamples: nil,
                                                                   configuration: configuration,
+                                                                  loadDataDispatchQueue: DispatchQueue(label: "WaveformImageDrawer" + NSUUID().uuidString),
                                                                   completionHandler: { images in
             if let images = images {
                 completionHandler(images[safeIndex: 0])
@@ -72,6 +73,7 @@ extension WaveformImageDrawer {
                                                                          configuration: configuration,
                                                                          context: context,
                                                                          lastOffset: lastOffset,
+                                                                         loadDataDispatchQueue: DispatchQueue(label: "WaveformImageDrawer" + NSUUID().uuidString),
                                                                          shouldDrawSilencePadding: shouldDrawSilencePadding)
         lastOffset = renderOperation.draw() // start on called thread
     }

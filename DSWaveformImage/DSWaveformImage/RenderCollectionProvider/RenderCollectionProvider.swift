@@ -65,7 +65,7 @@ public class RenderCollectionProvider {
         }
     }
     
-    // MARK: Static
+    // MARK: Static sharedQueue
     
     private static var _sharedQueue: OperationQueue?
     // sharedQueue will be overrided on subclasses for has access to private _sharedQueue, uniqued for each subclass
@@ -96,9 +96,41 @@ public class RenderCollectionProvider {
         queue.qualityOfService = qos
         
         let className = String(describing: self)
-        let queueName = className + "_Shared_" + NSUUID().uuidString
+        let queueName = className + "Queue_Shared_" + NSUUID().uuidString
         queue.name = queueName
         
+        return queue
+    }
+    
+    // MARK: Static sharedLoadDataQueue
+    
+    private static var _sharedLoadDataQueue: DispatchQueue?
+    // sharedLoadDataQueue will be overrided on subclasses for has access to private _sharedLoadDataQueue, uniqued for each subclass
+    class var sharedLoadDataQueue: DispatchQueue? {
+        get {
+            return _sharedLoadDataQueue
+        }
+        set {
+            _sharedLoadDataQueue = newValue
+        }
+    }
+    
+    /// Get sharedQueue
+    class func getSharedLoadDataQueue() -> DispatchQueue {
+        if let queue = sharedLoadDataQueue {
+            return queue
+        } else {
+            let queue = createSharedLoadDataQueue()
+            sharedLoadDataQueue = queue
+            return queue
+        }
+    }
+    
+    /// Creatae queue for loading data from resource, shared between all instance of current class
+    class func createSharedLoadDataQueue() -> DispatchQueue {
+        let className = String(describing: self)
+        let queueName = className + "LoadDataQueue_Shared_" + NSUUID().uuidString
+        let queue = DispatchQueue(label: queueName, qos: .userInitiated)
         return queue
     }
     
@@ -109,7 +141,8 @@ public class RenderCollectionProvider {
     var renderOperations: [Int: Operation] = [:]     // render operations. key - index
     
     var collectionConfiguration: RenderCollection.CollectionConfiguration
-    var queue: OperationQueue?
+    var queue: OperationQueue?                  // base queue for add all analyse & rendering operations
+    var loadDataDispatchQueue: DispatchQueue!   // queue for async loading data
     
     // MARK: Constructor/Destructor/Init
 
@@ -119,8 +152,10 @@ public class RenderCollectionProvider {
                                                                            itemsWidth: [])
         if shared {
             queue = type(of: self).getSharedQueue(qos: qos)
+            loadDataDispatchQueue = type(of: self).getSharedLoadDataQueue()
         } else {
             queue = createInstanceQueue(qos: qos)
+            loadDataDispatchQueue = createInstanceLoadDataQueue()
         }
     }
     
@@ -199,6 +234,7 @@ public class RenderCollectionProvider {
         guard let renderOperation = createRenderOperation(for: index,
                                                              renderData: renderSource.getData(),
                                                              size: size,
+                                                             loadDataDispatchQueue: loadDataDispatchQueue,
                                                              completion: completion) else {
             completion(nil)
             return
@@ -238,6 +274,7 @@ public class RenderCollectionProvider {
     func createRenderOperation(for index: Int,
                                renderData: Any?,
                                size: CGSize,
+                               loadDataDispatchQueue: DispatchQueue,
                                completion: (([UIImage]?) -> Void)?) -> Operation? {
         return nil
     }
@@ -297,4 +334,13 @@ public class RenderCollectionProvider {
         
         return queue
     }
+    
+    /// Creatae queue for loading data from resource, shared between all instance of current class
+    private func createInstanceLoadDataQueue() -> DispatchQueue {
+        let className = String(describing: self)
+        let queueName = className + NSUUID().uuidString
+        let queue = DispatchQueue(label: queueName, qos: .userInitiated)
+        return queue
+    }
+    
 }

@@ -21,9 +21,11 @@ class WaveformSamplesImageContextRenderOperation: WaveformSamplesImageRenderOper
                 configuration: Waveform.Configuration,
                 context: CGContext,
                 lastOffset: Int = 0,
+                loadDataDispatchQueue: DispatchQueue,
                 shouldDrawSilencePadding: Bool = false) {
         super.init(sourceSamples: sourceSamples,
                    configuration: configuration,
+                   loadDataDispatchQueue: loadDataDispatchQueue,
                    completionHandler: nil)
         self.newSampleCount = newSampleCount
         self.sourceContext = context

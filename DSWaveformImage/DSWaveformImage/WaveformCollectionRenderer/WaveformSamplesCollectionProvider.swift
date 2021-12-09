@@ -24,6 +24,16 @@ public class WaveformSamplesCollectionProvider: RenderCollectionProvider {
         }
     }
     
+    private static var _sharedLoadDataQueue: DispatchQueue?
+    override class var sharedLoadDataQueue: DispatchQueue? {
+        get {
+            return _sharedLoadDataQueue
+        }
+        set {
+            _sharedLoadDataQueue = newValue
+        }
+    }
+    
     // MARK: Instance
     
     private var url: URL?
@@ -62,6 +72,7 @@ public class WaveformSamplesCollectionProvider: RenderCollectionProvider {
     override func createRenderOperation(for index: Int,
                                         renderData: Any?,
                                         size: CGSize,
+                                        loadDataDispatchQueue: DispatchQueue,
                                         completion: (([UIImage]?) -> Void)?) -> Operation? {
         var samplesAtIndex: [Float]?
         if let aRenderData = renderData {
@@ -80,6 +91,7 @@ public class WaveformSamplesCollectionProvider: RenderCollectionProvider {
         let renderOperation = WaveformSamplesImageRenderOperation(sourceSamples: samplesAtIndex,
                                                                   configuration: configuration,
                                                                   index: index,
+                                                                  loadDataDispatchQueue: loadDataDispatchQueue,
                                                                   completionHandler: completion)
         return renderOperation
     }

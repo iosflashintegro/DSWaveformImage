@@ -24,6 +24,16 @@ public class WaveformTimeRangeCollectionProvider: RenderCollectionProvider {
         }
     }
     
+    private static var _sharedLoadDataQueue: DispatchQueue?
+    override class var sharedLoadDataQueue: DispatchQueue? {
+        get {
+            return _sharedLoadDataQueue
+        }
+        set {
+            _sharedLoadDataQueue = newValue
+        }
+    }
+    
     // MARK: Instance
 
     private var url: URL?
@@ -60,6 +70,7 @@ public class WaveformTimeRangeCollectionProvider: RenderCollectionProvider {
     override func createRenderOperation(for index: Int,
                                         renderData: Any?,
                                         size: CGSize,
+                                        loadDataDispatchQueue: DispatchQueue,
                                         completion: (([UIImage]?) -> Void)?) -> Operation? {
         guard let url = url else { return nil }
         var samplesTimeRange: RenderCollection.SamplesTimeRange?
@@ -80,6 +91,7 @@ public class WaveformTimeRangeCollectionProvider: RenderCollectionProvider {
                                                                     samplesTimeRange: samplesTimeRange,
                                                                     waveformConfiguration: configuration,
                                                                     index: index,
+                                                                    loadDataDispatchQueue: loadDataDispatchQueue,
                                                                     completionHandler: completion)
         return renderOperation
     }

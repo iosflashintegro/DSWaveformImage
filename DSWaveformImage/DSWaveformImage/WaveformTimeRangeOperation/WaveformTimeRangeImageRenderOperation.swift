@@ -1,11 +1,10 @@
-//
-//  WaveformTimeRangeImageRenderOperation.swift
-//  vqVideoeditor
-//
-//  Created by Dmitry Nuzhin on 12.11.2021.
-//  Copyright © 2021 Stas Klem. All rights reserved.
-//
-
+////
+////  WaveformTimeRangeImageRenderOperation.swift
+////  vqVideoeditor
+////
+////  Created by Dmitry Nuzhin on 12.11.2021.
+////  Copyright © 2021 Stas Klem. All rights reserved.
+////
 import Foundation
 import UIKit
 import Accelerate
@@ -39,6 +38,7 @@ class WaveformTimeRangeImageRenderOperation: AsyncOperation, RenderOperation {
     
     private var url: URL?
     private var _samplesTimeRange: RenderCollection.SamplesTimeRange?
+    private var loadDataDispatchQueue: DispatchQueue
     private var completionHandler: ((_ images: [UIImage]?) -> ())?
     
     private var outputImages: [UIImage]?
@@ -49,9 +49,11 @@ class WaveformTimeRangeImageRenderOperation: AsyncOperation, RenderOperation {
     /// Everything below this noise floor cutoff will be clipped and interpreted as silence. Default is `-50.0`.
     public var noiseFloorDecibelCutoff: Float = -50.0
 
-    private var assetReader: AVAssetReader!
-    private var audioAssetTrack: AVAssetTrack!
+    private var assetReader: AVAssetReader?
+    private var audioAssetTrack: AVAssetTrack?
     
+    private var loadDataWorkItem: DispatchWorkItem?
+    private var isReadStarting = false
     
     // MARK: Constructors/Destructors/Init
     
@@ -59,11 +61,13 @@ class WaveformTimeRangeImageRenderOperation: AsyncOperation, RenderOperation {
          samplesTimeRange:RenderCollection.SamplesTimeRange?,
          waveformConfiguration: Waveform.Configuration,
          index: Int?,
+         loadDataDispatchQueue: DispatchQueue,
          completionHandler: ((_ image: [UIImage]?) -> ())?) {
         self.url = url
         self._samplesTimeRange = samplesTimeRange
         self.waveformConfiguration = waveformConfiguration
         self.index = index
+        self.loadDataDispatchQueue = loadDataDispatchQueue
         self.completionHandler = completionHandler
     }
     
@@ -97,7 +101,7 @@ class WaveformTimeRangeImageRenderOperation: AsyncOperation, RenderOperation {
     
     override func cancel() {
         super.cancel()
-        assetReader?.cancelReading()
+        assetReader?.asset.cancelLoading()
     }
     
     // MARK: Private methods
@@ -108,7 +112,7 @@ class WaveformTimeRangeImageRenderOperation: AsyncOperation, RenderOperation {
         let samplesCount = samplesRange.samplesCount
         let timeRange = CMTimeRange(start: CMTime(seconds: samplesRange.startTime),
                                     end:  CMTime(seconds: samplesRange.endTime))
-        assetReader.timeRange = timeRange
+        assetReader?.timeRange = timeRange
         
         waveformSamples(count: samplesCount,
                         timeRange: timeRange,
@@ -137,6 +141,11 @@ fileprivate extension WaveformTimeRangeImageRenderOperation {
                          timeRange: CMTimeRange,
                          fftBands: Int?,
                          completionHandler: @escaping (_ analysis: WaveformAnalysis?) -> ()) {
+        guard let assetReader = assetReader, let audioAssetTrack = audioAssetTrack else {
+            completionHandler(nil)
+            return
+        }
+
         let trackOutput = AVAssetReaderTrackOutput(track: audioAssetTrack, outputSettings: outputSettings())
         if !assetReader.canAdd(trackOutput) {
             print("ERROR: assetReader can't add track output")
@@ -144,30 +153,45 @@ fileprivate extension WaveformTimeRangeImageRenderOperation {
             return
         }
         assetReader.add(trackOutput)
-        
         assetReader.asset.loadValuesAsynchronously(forKeys: ["duration"]) { [weak self] in
             guard let self = self else { return }
             if self.isCancelled {
                 completionHandler(nil)
                 return
             }
-            
+            self.loadAndExtractSamples(count: requiredNumberOfSamples,
+                                       timeRange: timeRange,
+                                       fftBands: fftBands,
+                                       completionHandler: completionHandler)
+        }
+    }
+    
+    /// Load samples from assetReader.
+    /// - Note: Detach to separate method for use 'assetReader.startReading()' on separate thread (loadDataDispatchQueue), shared between all WaveformTimeRangeImageRenderOperation.
+    /// If call 'assetReader.startReading()' on any thread simultaniously, crash may happen
+    private func loadAndExtractSamples(count requiredNumberOfSamples: Int,
+                                            timeRange: CMTimeRange,
+                                            fftBands: Int?,
+                                            completionHandler: @escaping (_ analysis: WaveformAnalysis?) -> ()) {
+        let workItem = DispatchWorkItem(block: { [weak self] in
+            guard let self = self,
+                  let assetReader = self.assetReader else {
+                completionHandler(nil)
+                return
+            }
+
             var error: NSError?
-            let status = self.assetReader.asset.statusOfValue(forKey: "duration", error: &error)
+            let status = assetReader.asset.statusOfValue(forKey: "duration", error: &error)
             switch status {
             case .loaded:
                 let existSamplesCount = self.samplesCountOfAssetReader()
-                if self.isCancelled {
-                    completionHandler(nil)
-                    return
-                }
                 let analysis = self.extract(existSamplesCount: existSamplesCount, downsampledTo: requiredNumberOfSamples, fftBands: fftBands)
-                
-                switch self.assetReader.status {
+
+                switch assetReader.status {
                 case .completed:
                     completionHandler(analysis)
                 default:
-                    print("ERROR: reading waveform audio data has failed \(self.assetReader.status)")
+                    print("ERROR: reading waveform audio data has failed \(assetReader.status)")
                     completionHandler(nil)
                 }
             case .failed, .cancelled, .loading, .unknown:
@@ -177,12 +201,16 @@ fileprivate extension WaveformTimeRangeImageRenderOperation {
                 print("failed to load due to: \(error?.localizedDescription ?? "unknown error")")
                 completionHandler(nil)
             }
-        }
+        })
+        loadDataWorkItem = workItem
+        loadDataDispatchQueue.sync(execute: workItem)
     }
-
+    
     private func extract(existSamplesCount: Int,
                          downsampledTo targetSampleCount: Int,
                          fftBands: Int?) -> WaveformAnalysis {
+        guard let assetReader = assetReader else { return WaveformAnalysis(amplitudes: [], fft: nil) }
+        
         var outputSamples = [Float]()
         var outputFFT = fftBands == nil ? nil : [TempiFFT]()
         var sampleBuffer = Data()
@@ -192,8 +220,8 @@ fileprivate extension WaveformTimeRangeImageRenderOperation {
         let samplesPerPixel = max(1, existSamplesCount / targetSampleCount)
         let samplesPerFFT = 4096 // ~100ms at 44.1kHz, rounded to closest pow(2) for FFT
 
-        self.assetReader.startReading()
-        while self.assetReader.status == .reading {
+        isReadStarting = assetReader.startReading()
+        while assetReader.status == .reading {
             let trackOutput = assetReader.outputs.first!
 
             guard let nextSampleBuffer = trackOutput.copyNextSampleBuffer(),
@@ -316,6 +344,8 @@ fileprivate extension WaveformTimeRangeImageRenderOperation {
 
     // swiftlint:disable force_cast
     private func samplesCountOfAssetReader() -> Int {
+        guard let assetReader = assetReader,
+              let audioAssetTrack = audioAssetTrack else { return 0 }
         var samplesCount = 0
 
         autoreleasepool {
@@ -533,6 +563,7 @@ extension WaveformTimeRangeImageRenderOperation: NSCopying {
                                                          samplesTimeRange: self._samplesTimeRange,
                                                          waveformConfiguration: self.waveformConfiguration,
                                                          index: self.index,
+                                                         loadDataDispatchQueue: self.loadDataDispatchQueue,
                                                          completionHandler: self.completionHandler)
         copy.index = self.index
         copy.outputImages = self.outputImages
