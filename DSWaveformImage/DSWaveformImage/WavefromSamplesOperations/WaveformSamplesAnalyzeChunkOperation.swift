@@ -16,7 +16,7 @@ public class WaveformSamplesAnalyzeChunkOperation: Operation {
     private var newSamplesCount: Int = 0
     private var duration: TimeInterval = 0
     private var collectionConfiguration: RenderCollection.CollectionConfiguration
-    private var completionHandler: ((_ amplitudes: [[Float]]?, _ updatedChunkIndexes: [Int]?, _ ranges: [RenderCollection.SamplesTimeRange]?) -> ())?
+    private var completionHandler: ((_ amplitudes: [[Float]]?, _ updatedChunkIndexes: [Int]?, _ ranges: [RenderCollection.SamplesTimeRange]?) -> Void)?
     
     private var outputTimeRanges: [RenderCollection.SamplesTimeRange]?
     private var outputChunkAmplitudes: [[Float]]?
@@ -29,7 +29,7 @@ public class WaveformSamplesAnalyzeChunkOperation: Operation {
                 newSamplesCount: Int,
                 duration: TimeInterval,
                 collectionConfiguration: RenderCollection.CollectionConfiguration,
-                completionHandler: ((_ amplitudes: [[Float]]?, _ updatedChunkIndexes: [Int]?, _ ranges: [RenderCollection.SamplesTimeRange]?) -> ())?) {
+                completionHandler: ((_ amplitudes: [[Float]]?, _ updatedChunkIndexes: [Int]?, _ ranges: [RenderCollection.SamplesTimeRange]?) -> Void)?) {
         self.sourceSamples = sourceSamples
         self.newSamplesCount = newSamplesCount
         self.duration = duration

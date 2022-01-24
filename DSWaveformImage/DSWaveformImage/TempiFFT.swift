@@ -5,7 +5,8 @@
 //  Created by John Scalo on 1/12/16.
 //  Copyright © 2016 John Scalo. See accompanying License.txt for terms.
 
-/*  A functional FFT built atop Apple's Accelerate framework for optimum performance on any device. In addition to simply performing the FFT and providing access to the resulting data, TempiFFT provides the ability to map the FFT spectrum data into logical bands, either linear or logarithmic, for further analysis.
+/*  A functional FFT built atop Apple's Accelerate framework for optimum performance on any device. In addition to simply performing the FFT and providing access to the resulting data,
+dd TempiFFT provides the ability to map the FFT spectrum data into logical bands, either linear or logarithmic, for further analysis.
 
  E.g.
 
@@ -39,7 +40,7 @@ import Accelerate
     case hamming
 }
 
-@objc class TempiFFT : NSObject {
+@objc class TempiFFT: NSObject {
 
     /// The length of the sample buffer we'll be analyzing.
     private(set) var size: Int
@@ -49,9 +50,7 @@ import Accelerate
 
     /// The Nyquist frequency is ```sampleRate``` / 2
     var nyquistFrequency: Float {
-        get {
-            return sampleRate / 2.0
-        }
+        return sampleRate / 2.0
     }
 
     // After performing the FFT, contains size/2 magnitudes, one for each frequency band.
@@ -65,9 +64,7 @@ import Accelerate
 
     /// The average bandwidth throughout the spectrum (nyquist / magnitudes.count)
     var bandwidth: Float {
-        get {
-            return self.nyquistFrequency / Float(self.magnitudes.count)
-        }
+        return self.nyquistFrequency / Float(self.magnitudes.count)
     }
 
     /// The number of calculated bands (must call calculateLinearBands() or calculateLogarithmicBands() first).
@@ -79,17 +76,17 @@ import Accelerate
     /// Supplying a window type (hanning or hamming) smooths the edges of the incoming waveform and reduces output errors from the FFT function (aka "spectral leakage" - ewww).
     var windowType = TempiFFTWindowType.none
 
-    private var halfSize:Int
-    private var log2Size:Int
-    private var window:[Float] = []
-    private var fftSetup:FFTSetup
+    private var halfSize: Int
+    private var log2Size: Int
+    private var window: [Float] = []
+    private var fftSetup: FFTSetup
     private var hasPerformedFFT: Bool = false
     private var complexBuffer: DSPSplitComplex!
 
     /// Instantiate the FFT.
     /// - Parameter withSize: The length of the sample buffer we'll be analyzing. Must be a power of 2. The resulting ```magnitudes``` are of length ```inSize/2```.
     /// - Parameter sampleRate: Sampling rate of the provided audio data.
-    init(withSize inSize:Int, sampleRate inSampleRate: Float) {
+    init(withSize inSize: Int, sampleRate inSampleRate: Float) {
 
         let sizeFloat: Float = Float(inSize)
 
@@ -126,7 +123,7 @@ import Accelerate
 
     /// Perform a forward FFT on the provided single-channel audio data. When complete, the instance can be queried for information about the analysis or the magnitudes can be accessed directly.
     /// - Parameter inMonoBuffer: Audio data in mono format
-    func fftForward(_ inMonoBuffer:[Float]) {
+    func fftForward(_ inMonoBuffer: [Float]) {
 
         var analysisBuffer = inMonoBuffer
 
@@ -173,7 +170,8 @@ import Accelerate
             }
         }
 
-        // This compiles without error but doesn't actually work. It results in garbage values being stored to the complexBuffer's real and imag parts. Why? The above workaround is undoubtedly tons slower so it would be good to get vDSP_ctoz working again.
+        // This compiles without error but doesn't actually work. It results in garbage values being stored to the complexBuffer's real and imag parts.
+        // Why? The above workaround is undoubtedly tons slower so it would be good to get vDSP_ctoz working again.
         //        withUnsafePointer(to: &analysisBuffer, { $0.withMemoryRebound(to: DSPComplex.self, capacity: analysisBuffer.count) {
         //            vDSP_ctoz($0, 2, &(self.complexBuffer!), 1, UInt(self.halfSize))
         //            }
@@ -229,7 +227,7 @@ import Accelerate
     }
 
     // On arrays of 1024 elements, this is ~35x faster than an iterational algorithm. Thanks Accelerate.framework!
-    @inline(__always) private func fastAverage(_ array:[Float], _ startIdx: Int, _ stopIdx: Int) -> Float {
+    @inline(__always) private func fastAverage(_ array: [Float], _ startIdx: Int, _ stopIdx: Int) -> Float {
         var mean: Float = 0
         array.withUnsafeBufferPointer { arrayBP in
             vDSP_meanv(arrayBP.baseAddress! + startIdx, 1, &mean, UInt(stopIdx - startIdx))

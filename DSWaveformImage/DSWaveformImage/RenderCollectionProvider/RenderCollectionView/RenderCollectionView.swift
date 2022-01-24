@@ -182,9 +182,9 @@ class RenderCollectionView: UIView {
             if contentOffset.x < 0 {
                 collectionViewContentOffset = .zero
             } else if contentOffset.x > (bounds.size.width - itemWidth) {
-                collectionViewContentOffset = CGPoint(x: (bounds.size.width - itemWidth) , y: 0)
+                collectionViewContentOffset = CGPoint(x: (bounds.size.width - itemWidth), y: 0)
             } else {
-                collectionViewContentOffset = CGPoint(x: contentOffset.x , y: 0)
+                collectionViewContentOffset = CGPoint(x: contentOffset.x, y: 0)
             }
             
             let leftEcxess = itemWidth

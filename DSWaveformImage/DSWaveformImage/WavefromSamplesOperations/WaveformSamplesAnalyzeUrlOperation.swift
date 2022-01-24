@@ -38,8 +38,8 @@ public class WaveformSamplesAnalyzeUrlOperation: AsyncOperation {
     private var requiredNumberOfSamples: Int
     private var chunksCount: [Int] = []
     
-    private var linearCompletionHandler: ((_ amplitudes: [Float]?) -> ())?
-    private var chunkCompletionHandler: ((_ amplitudes: [[Float]]?) -> ())?
+    private var linearCompletionHandler: ((_ amplitudes: [Float]?) -> Void)?
+    private var chunkCompletionHandler: ((_ amplitudes: [[Float]]?) -> Void)?
     
     private var outputLinearAmplitudes: [Float]?
     private var outputChunkAmplitudes: [[Float]]?
@@ -50,7 +50,7 @@ public class WaveformSamplesAnalyzeUrlOperation: AsyncOperation {
     /// - Parameter completionHandler: called from a background thread. Returns the linear sampled result or nil in edge-error cases.
     public init(audioAssetURL: URL,
                 count: Int,
-                completionHandler: ((_ amplitudes: [Float]?) -> ())?) {
+                completionHandler: ((_ amplitudes: [Float]?) -> Void)?) {
         self.audioAssetURL = audioAssetURL
         self.requiredNumberOfSamples = count
         self.linearCompletionHandler = completionHandler
@@ -64,7 +64,7 @@ public class WaveformSamplesAnalyzeUrlOperation: AsyncOperation {
     public init(audioAssetURL: URL,
                 count: Int,
                 chunksCount: [Int],
-                completionHandler: ((_ amplitudes: [[Float]]?) -> ())?) {
+                completionHandler: ((_ amplitudes: [[Float]]?) -> Void)?) {
         self.audioAssetURL = audioAssetURL
         self.requiredNumberOfSamples = count
         self.chunksCount = chunksCount
@@ -115,7 +115,7 @@ public class WaveformSamplesAnalyzeUrlOperation: AsyncOperation {
     /// Calls the completionHandler on a background thread.
     /// - Parameter count: amount of samples to be calculated. Downsamples.
     /// - Parameter completionHandler: called from a background thread. Returns the sampled result or nil in edge-error cases.
-    public func samples(count: Int, completionHandler: @escaping (_ amplitudes: [Float]?) -> ()) {
+    public func samples(count: Int, completionHandler: @escaping (_ amplitudes: [Float]?) -> Void) {
         waveformSamples(count: count, fftBands: nil) { analysis in
             completionHandler(analysis?.amplitudes)
         }
@@ -127,7 +127,7 @@ public class WaveformSamplesAnalyzeUrlOperation: AsyncOperation {
 fileprivate extension WaveformSamplesAnalyzeUrlOperation {
     func waveformSamples(count requiredNumberOfSamples: Int,
                          fftBands: Int?,
-                         completionHandler: @escaping (_ analysis: WaveformAnalysis?) -> ()) {
+                         completionHandler: @escaping (_ analysis: WaveformAnalysis?) -> Void) {
         let trackOutput = AVAssetReaderTrackOutput(track: audioAssetTrack, outputSettings: outputSettings())
         assetReader.add(trackOutput)
 
@@ -187,7 +187,7 @@ fileprivate extension WaveformSamplesAnalyzeUrlOperation {
             }
 
             var readBufferLength = 0
-            var readBufferPointer: UnsafeMutablePointer<Int8>? = nil
+            var readBufferPointer: UnsafeMutablePointer<Int8>?
             CMBlockBufferGetDataPointer(blockBuffer, atOffset: 0, lengthAtOffsetOut: &readBufferLength, totalLengthOut: nil, dataPointerOut: &readBufferPointer)
             sampleBuffer.append(UnsafeBufferPointer(start: readBufferPointer, count: readBufferLength))
             if fftBands != nil {

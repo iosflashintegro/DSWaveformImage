@@ -39,7 +39,7 @@ class WaveformTimeRangeImageRenderOperation: AsyncOperation, RenderOperation {
     private var url: URL?
     private var _samplesTimeRange: RenderCollection.SamplesTimeRange?
     private var loadDataDispatchQueue: DispatchQueue
-    private var completionHandler: ((_ images: [UIImage]?) -> ())?
+    private var completionHandler: ((_ images: [UIImage]?) -> Void)?
     
     private var outputImages: [UIImage]?
     
@@ -58,11 +58,11 @@ class WaveformTimeRangeImageRenderOperation: AsyncOperation, RenderOperation {
     // MARK: Constructors/Destructors/Init
     
     init(url: URL?,
-         samplesTimeRange:RenderCollection.SamplesTimeRange?,
+         samplesTimeRange: RenderCollection.SamplesTimeRange?,
          waveformConfiguration: Waveform.Configuration,
          index: Int?,
          loadDataDispatchQueue: DispatchQueue,
-         completionHandler: ((_ image: [UIImage]?) -> ())?) {
+         completionHandler: ((_ image: [UIImage]?) -> Void)?) {
         self.url = url
         self._samplesTimeRange = samplesTimeRange
         self.waveformConfiguration = waveformConfiguration
@@ -108,10 +108,10 @@ class WaveformTimeRangeImageRenderOperation: AsyncOperation, RenderOperation {
     
     private func renderImages(url: URL,
                               samplesRange: RenderCollection.SamplesTimeRange,
-                              renderCompletion: @escaping (_ images: [UIImage]?) -> ()) {
+                              renderCompletion: @escaping (_ images: [UIImage]?) -> Void) {
         let samplesCount = samplesRange.samplesCount
         let timeRange = CMTimeRange(start: CMTime(seconds: samplesRange.startTime),
-                                    end:  CMTime(seconds: samplesRange.endTime))
+                                    end: CMTime(seconds: samplesRange.endTime))
         assetReader?.timeRange = timeRange
         
         waveformSamples(count: samplesCount,
@@ -140,7 +140,7 @@ fileprivate extension WaveformTimeRangeImageRenderOperation {
     func waveformSamples(count requiredNumberOfSamples: Int,
                          timeRange: CMTimeRange,
                          fftBands: Int?,
-                         completionHandler: @escaping (_ analysis: WaveformAnalysis?) -> ()) {
+                         completionHandler: @escaping (_ analysis: WaveformAnalysis?) -> Void) {
         guard let assetReader = assetReader, let audioAssetTrack = audioAssetTrack else {
             completionHandler(nil)
             return
@@ -170,9 +170,9 @@ fileprivate extension WaveformTimeRangeImageRenderOperation {
     /// - Note: Detach to separate method for use 'assetReader.startReading()' on separate thread (loadDataDispatchQueue), shared between all WaveformTimeRangeImageRenderOperation.
     /// If call 'assetReader.startReading()' on any thread simultaniously, crash may happen
     private func loadAndExtractSamples(count requiredNumberOfSamples: Int,
-                                            timeRange: CMTimeRange,
-                                            fftBands: Int?,
-                                            completionHandler: @escaping (_ analysis: WaveformAnalysis?) -> ()) {
+                                       timeRange: CMTimeRange,
+                                       fftBands: Int?,
+                                       completionHandler: @escaping (_ analysis: WaveformAnalysis?) -> Void) {
         let workItem = DispatchWorkItem(block: { [weak self] in
             guard let self = self,
                   let assetReader = self.assetReader else {
@@ -230,7 +230,7 @@ fileprivate extension WaveformTimeRangeImageRenderOperation {
             }
 
             var readBufferLength = 0
-            var readBufferPointer: UnsafeMutablePointer<Int8>? = nil
+            var readBufferPointer: UnsafeMutablePointer<Int8>?
             CMBlockBufferGetDataPointer(blockBuffer, atOffset: 0, lengthAtOffsetOut: &readBufferLength, totalLengthOut: nil, dataPointerOut: &readBufferPointer)
             sampleBuffer.append(UnsafeBufferPointer(start: readBufferPointer, count: readBufferLength))
             if fftBands != nil {
@@ -423,7 +423,7 @@ extension WaveformTimeRangeImageRenderOperation {
     
     private func render(samples: [Float],
                         with configuration: Waveform.Configuration,
-                        completionHandler: @escaping (_ images: [UIImage]?) -> ()){
+                        completionHandler: @escaping (_ images: [UIImage]?) -> Void) {
         if let image = render(samples: samples, with: configuration) {
             completionHandler([image])
         } else {

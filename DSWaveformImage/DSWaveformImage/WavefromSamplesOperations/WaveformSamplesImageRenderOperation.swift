@@ -26,7 +26,7 @@ public class WaveformSamplesImageRenderOperation: Operation, RenderOperation {
     // MARK: Private properties
     private var _sourceSamples: [Float]?
     private var loadDataDispatchQueue: DispatchQueue
-    private var completionHandler: ((_ images: [UIImage]?) -> ())?
+    private var completionHandler: ((_ images: [UIImage]?) -> Void)?
     private var outputImages: [UIImage]?
     
     /// Makes sure we always look at the same samples while animating
@@ -35,7 +35,7 @@ public class WaveformSamplesImageRenderOperation: Operation, RenderOperation {
     public init(sourceSamples: [Float]? = nil,
                 configuration: Waveform.Configuration,
                 loadDataDispatchQueue: DispatchQueue,
-                completionHandler: ((_ images: [UIImage]?) -> ())?) {
+                completionHandler: ((_ images: [UIImage]?) -> Void)?) {
         self._sourceSamples = sourceSamples
         self.configuration = configuration
         self.loadDataDispatchQueue = loadDataDispatchQueue
@@ -46,7 +46,7 @@ public class WaveformSamplesImageRenderOperation: Operation, RenderOperation {
                 configuration: Waveform.Configuration,
                 index: Int,
                 loadDataDispatchQueue: DispatchQueue,
-                completionHandler: ((_ images: [UIImage]?) -> ())?) {
+                completionHandler: ((_ images: [UIImage]?) -> Void)?) {
         self._sourceSamples = sourceSamples
         self.configuration = configuration
         self.loadDataDispatchQueue = loadDataDispatchQueue
@@ -129,7 +129,7 @@ private extension WaveformSamplesImageRenderOperation {
     
     private func render(samples: [Float],
                         with configuration: Waveform.Configuration,
-                        completionHandler: @escaping (_ images: [UIImage]?) -> ()){
+                        completionHandler: @escaping (_ images: [UIImage]?) -> Void) {
         if let image = render(samples: samples, with: configuration) {
             completionHandler([image])
         } else {

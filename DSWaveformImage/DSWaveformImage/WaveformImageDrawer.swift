@@ -29,7 +29,7 @@ public class WaveformImageDrawer {
     /// Async analyzes the provided audio and renders a UIImage of the waveform data calculated by the analyzer.
     public func waveformImage(fromAudioAt audioAssetURL: URL,
                               with configuration: Waveform.Configuration,
-                              completionHandler: @escaping (_ waveformImage: UIImage?) -> ()) {
+                              completionHandler: @escaping (_ waveformImage: UIImage?) -> Void) {
         cancelWaveformGeneration()
         
         let sampleCount = Int(configuration.size.width * configuration.scale)

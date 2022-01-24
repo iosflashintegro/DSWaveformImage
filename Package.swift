@@ -6,13 +6,13 @@ import PackageDescription
 let package = Package(
     name: "DSWaveformImage",
     platforms: [
-        .iOS(.v10),
+        .iOS(.v10)
     ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
             name: "DSWaveformImage",
-            targets: ["DSWaveformImage"]),
+            targets: ["DSWaveformImage"])
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -24,6 +24,6 @@ let package = Package(
         .target(
             name: "DSWaveformImage",
             dependencies: [],
-            path: "DSWaveformImage/DSWaveformImage"),
+            path: "DSWaveformImage/DSWaveformImage")
     ]
 )

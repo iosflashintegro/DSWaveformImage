@@ -23,7 +23,7 @@ public class RenderCollectionProvider {
         case notSource
         
         // simple compare (only compare state, without underlying operation
-        static func ==(lhs: RenderSource, rhs: RenderSource) -> Bool {
+        static func == (lhs: RenderSource, rhs: RenderSource) -> Bool {
             switch (lhs, rhs) {
             case (.activeOperation, .activeOperation):
                 return true
@@ -188,7 +188,7 @@ public class RenderCollectionProvider {
     /// Get image for target index
     public func getImages(for index: Int,
                           size: CGSize,
-                          completionHandler: ((_ image: [UIImage]?, _ index: Int) -> ())?) {
+                          completionHandler: ((_ image: [UIImage]?, _ index: Int) -> Void)?) {
         let completion: ([UIImage]?) -> Void = { image in
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else {
@@ -211,8 +211,7 @@ public class RenderCollectionProvider {
         var renderSource: RenderSource = .notSource
         if let existData = getExistAnalyzeData(index: index) {
             renderSource = .existData(existData)
-        }
-        else if let analyzerOperation = analyzerOperation {
+        } else if let analyzerOperation = analyzerOperation {
             if analyzerOperation.isFinished {
                 if let renderData = getAnalyzeData(operation: analyzerOperation, index: index) {
                     renderSource = .finishedOperation(renderData)
@@ -310,7 +309,7 @@ public class RenderCollectionProvider {
         guard let existAnalyzerOperation = analyzerOperation else {
             return []
         }
-        let existRenderOperations = Array(renderOperations.values).filter( { $0.dependencies.contains(existAnalyzerOperation)} )
+        let existRenderOperations = Array(renderOperations.values).filter { $0.dependencies.contains(existAnalyzerOperation)}
         var copiedOperations: [RenderOperation] = []
         existRenderOperations.forEach {
             if let copyRenderOperation = $0.copy() as? RenderOperation {

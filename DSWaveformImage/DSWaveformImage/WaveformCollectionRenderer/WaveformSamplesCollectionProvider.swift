@@ -52,7 +52,7 @@ public class WaveformSamplesCollectionProvider: RenderCollectionProvider {
                                duration: TimeInterval,
                                collectionConfiguration: RenderCollection.CollectionConfiguration,
                                waveformConfiguration: Waveform.Configuration,
-                               completionHandler: ((_ updatedChunkIndexes: [Int]?) -> ())?) {
+                               completionHandler: ((_ updatedChunkIndexes: [Int]?) -> Void)?) {
         self.collectionConfiguration = collectionConfiguration
         self.waveformConfiguration = waveformConfiguration
         let anAnalyzerOperation = WaveformSamplesAnalyzeChunkOperation(sourceSamples: amplitudes,
@@ -76,7 +76,7 @@ public class WaveformSamplesCollectionProvider: RenderCollectionProvider {
                                         completion: (([UIImage]?) -> Void)?) -> Operation? {
         var samplesAtIndex: [Float]?
         if let aRenderData = renderData {
-            if let aSamplesAtIndex = aRenderData as? Array<Float> {
+            if let aSamplesAtIndex = aRenderData as? [Float] {
                 samplesAtIndex = aSamplesAtIndex
             } else {
                 // in incorrect renderData type

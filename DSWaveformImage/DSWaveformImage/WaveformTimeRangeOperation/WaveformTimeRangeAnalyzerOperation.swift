@@ -20,7 +20,7 @@ class WaveformTimeRangeAnalyzerOperation: Operation {
     private var url: URL
     private var timeRange: ClosedRange<TimeInterval>
     private var collectionConfiguration: RenderCollection.CollectionConfiguration
-    private var completionHandler: ((_ ranges: [RenderCollection.SamplesTimeRange]?) -> ())?
+    private var completionHandler: ((_ ranges: [RenderCollection.SamplesTimeRange]?) -> Void)?
     
     private var outputTimeRanges: [RenderCollection.SamplesTimeRange]?
     
@@ -33,7 +33,7 @@ class WaveformTimeRangeAnalyzerOperation: Operation {
     init(url: URL,
          timeRange: ClosedRange<TimeInterval>,
          collectionConfiguration: RenderCollection.CollectionConfiguration,
-         completionHandler: ((_ ranges: [RenderCollection.SamplesTimeRange]?) -> ())?) {
+         completionHandler: ((_ ranges: [RenderCollection.SamplesTimeRange]?) -> Void)?) {
         self.url = url
         self.timeRange = timeRange
         self.collectionConfiguration = collectionConfiguration

@@ -44,7 +44,7 @@ public class WaveformAnalyzer {
     /// - Parameter count: amount of samples to be calculated. Downsamples.
     /// - Parameter qos: QoS of the DispatchQueue the calculations are performed (and returned) on.
     /// - Parameter completionHandler: called from a background thread. Returns the sampled result or nil in edge-error cases.
-    public func samples(count: Int, qos: DispatchQoS.QoSClass = .userInitiated, completionHandler: @escaping (_ amplitudes: [Float]?) -> ()) {
+    public func samples(count: Int, qos: DispatchQoS.QoSClass = .userInitiated, completionHandler: @escaping (_ amplitudes: [Float]?) -> Void) {
         waveformSamples(count: count, qos: qos, fftBands: nil) { analysis in
             completionHandler(analysis?.amplitudes)
         }
@@ -58,7 +58,7 @@ fileprivate extension WaveformAnalyzer {
             count requiredNumberOfSamples: Int,
             qos: DispatchQoS.QoSClass,
             fftBands: Int?,
-            completionHandler: @escaping (_ analysis: WaveformAnalysis?) -> ()) {
+            completionHandler: @escaping (_ analysis: WaveformAnalysis?) -> Void) {
         let trackOutput = AVAssetReaderTrackOutput(track: audioAssetTrack, outputSettings: outputSettings())
         assetReader.add(trackOutput)
 
@@ -112,7 +112,7 @@ fileprivate extension WaveformAnalyzer {
             }
 
             var readBufferLength = 0
-            var readBufferPointer: UnsafeMutablePointer<Int8>? = nil
+            var readBufferPointer: UnsafeMutablePointer<Int8>?
             CMBlockBufferGetDataPointer(blockBuffer, atOffset: 0, lengthAtOffsetOut: &readBufferLength, totalLengthOut: nil, dataPointerOut: &readBufferPointer)
             sampleBuffer.append(UnsafeBufferPointer(start: readBufferPointer, count: readBufferLength))
             if fftBands != nil {
