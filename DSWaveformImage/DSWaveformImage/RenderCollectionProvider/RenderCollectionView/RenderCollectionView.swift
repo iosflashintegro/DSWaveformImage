@@ -139,6 +139,10 @@ class RenderCollectionView: UIView {
         collectionView.register(RenderMultiImagesCell.self, forCellWithReuseIdentifier: cellIdentifier(for: RenderMultiImagesCell.self))
 
         addSubview(collectionView)
+        
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.widthAnchor.constraint(equalTo: self.widthAnchor).isActive = true
+        collectionView.heightAnchor.constraint(equalTo: self.heightAnchor).isActive = true
     }
     
     private func getCellSize(for indexPath: IndexPath) -> CGSize {
