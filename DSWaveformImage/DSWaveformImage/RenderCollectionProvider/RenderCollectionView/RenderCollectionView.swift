@@ -44,7 +44,6 @@ class RenderCollectionView: UIView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        createRenderCollectionProvider()
         setupUI()
     }
     
@@ -65,7 +64,7 @@ class RenderCollectionView: UIView {
     
     /// Create data source for renderProvider
     ///  - Note: override on children
-    func createRenderCollectionProvider() {
+    func createRenderCollectionProvider(queueType: VideoPreviewCollectionProvider.QueueType) {
     }
     
     /// Calls on cell change frame

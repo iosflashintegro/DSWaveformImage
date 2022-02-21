@@ -24,13 +24,13 @@ public class WaveformTimeRangeCollectionProvider: RenderCollectionProvider {
         }
     }
     
-    private static var _sharedLoadDataQueue: DispatchQueue?
-    override class var sharedLoadDataQueue: DispatchQueue? {
+    private static var _sharedFullLoadDataQueue: DispatchQueue?
+    override class var sharedFullLoadDataQueue: DispatchQueue? {
         get {
-            return _sharedLoadDataQueue
+            return _sharedFullLoadDataQueue
         }
         set {
-            _sharedLoadDataQueue = newValue
+            _sharedFullLoadDataQueue = newValue
         }
     }
     
@@ -41,9 +41,9 @@ public class WaveformTimeRangeCollectionProvider: RenderCollectionProvider {
     
     private var samplesTimeRanges: [RenderCollection.SamplesTimeRange]? // параметры интервалов для каждой из ячеек
     
-    public override init(qos: QualityOfService = .userInitiated, shared: Bool = false) {
+    public override init(qos: QualityOfService = .userInitiated, queueType: QueueType) {
         waveformConfiguration = Waveform.Configuration()
-        super.init(qos: qos, shared: shared)
+        super.init(qos: qos, queueType: queueType)
     }
     
     /// Analyze audio from url & load all samples

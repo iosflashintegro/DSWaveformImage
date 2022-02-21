@@ -14,6 +14,13 @@ public class RenderCollectionProvider {
     
     // MARK: Enum
     
+    /// Type of rendering & load data queues
+    public enum QueueType {
+        case nonShared                              // queue is created for each instanse of provider
+        case sharedFull                             // queue is single for all instances in app (shared between all instanses of provider in app)
+        case shared(OperationQueue, DispatchQueue)  // queue is single for any providers (shared between instanses of provider with same queue)
+    }
+    
     /// Source for rendering data
     enum RenderSource: CustomStringConvertible {
         
@@ -79,17 +86,64 @@ public class RenderCollectionProvider {
     }
     
     /// Get sharedQueue
-    class func getSharedQueue(qos: QualityOfService = .userInitiated) -> OperationQueue {
+    class func getSharedFullQueue(qos: QualityOfService = .userInitiated) -> OperationQueue {
         if let queue = sharedQueue {
             return queue
         } else {
-            let queue = createSharedQueue(qos: qos)
+            let queue = createSharedFullQueue(qos: qos)
             sharedQueue = queue
             return queue
         }
     }
     
     /// Creatae queue for rendering, shared between all instance of current class
+    class func createSharedFullQueue(qos: QualityOfService = .userInitiated) -> OperationQueue {
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = 1
+        queue.qualityOfService = qos
+        
+        let className = String(describing: self)
+        let queueName = className + "Queue_SharedFull_" + NSUUID().uuidString
+        queue.name = queueName
+        
+        return queue
+    }
+    
+    // MARK: Static sharedFullLoadDataQueue
+    
+    private static var _sharedFullLoadDataQueue: DispatchQueue?
+    // sharedFullLoadDataQueue will be overrided on subclasses for has access to private _sharedFullLoadDataQueue, uniqued for each subclass
+    class var sharedFullLoadDataQueue: DispatchQueue? {
+        get {
+            return _sharedFullLoadDataQueue
+        }
+        set {
+            _sharedFullLoadDataQueue = newValue
+        }
+    }
+    
+    /// Get sharedQueue
+    class func getSharedFullLoadDataQueue() -> DispatchQueue {
+        if let queue = sharedFullLoadDataQueue {
+            return queue
+        } else {
+            let queue = createSharedFullLoadDataQueue()
+            sharedFullLoadDataQueue = queue
+            return queue
+        }
+    }
+    
+    /// Creatae queue for loading data from resource, shared between all instance of current class
+    class func createSharedFullLoadDataQueue() -> DispatchQueue {
+        let className = String(describing: self)
+        let queueName = className + "LoadDataQueue_SharedFull_" + NSUUID().uuidString
+        let queue = DispatchQueue(label: queueName, qos: .userInitiated)
+        return queue
+    }
+    
+    // MARK: Static methods
+    
+    /// Creatae queue for rendering, shared between any instances of current class
     class func createSharedQueue(qos: QualityOfService = .userInitiated) -> OperationQueue {
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = 1
@@ -102,31 +156,7 @@ public class RenderCollectionProvider {
         return queue
     }
     
-    // MARK: Static sharedLoadDataQueue
-    
-    private static var _sharedLoadDataQueue: DispatchQueue?
-    // sharedLoadDataQueue will be overrided on subclasses for has access to private _sharedLoadDataQueue, uniqued for each subclass
-    class var sharedLoadDataQueue: DispatchQueue? {
-        get {
-            return _sharedLoadDataQueue
-        }
-        set {
-            _sharedLoadDataQueue = newValue
-        }
-    }
-    
-    /// Get sharedQueue
-    class func getSharedLoadDataQueue() -> DispatchQueue {
-        if let queue = sharedLoadDataQueue {
-            return queue
-        } else {
-            let queue = createSharedLoadDataQueue()
-            sharedLoadDataQueue = queue
-            return queue
-        }
-    }
-    
-    /// Creatae queue for loading data from resource, shared between all instance of current class
+    /// Creatae queue for loading data from resource, shared between any instances of current class
     class func createSharedLoadDataQueue() -> DispatchQueue {
         let className = String(describing: self)
         let queueName = className + "LoadDataQueue_Shared_" + NSUUID().uuidString
@@ -146,16 +176,20 @@ public class RenderCollectionProvider {
     
     // MARK: Constructor/Destructor/Init
 
-    public init(qos: QualityOfService = .userInitiated, shared: Bool = false) {
+    public init(qos: QualityOfService = .userInitiated, queueType: QueueType) {
         collectionConfiguration = RenderCollection.CollectionConfiguration(collectionWidth: 0,
                                                                            collectionHeight: 0,
                                                                            itemsWidth: [])
-        if shared {
-            queue = type(of: self).getSharedQueue(qos: qos)
-            loadDataDispatchQueue = type(of: self).getSharedLoadDataQueue()
-        } else {
+        switch queueType {
+        case .nonShared:
             queue = createInstanceQueue(qos: qos)
             loadDataDispatchQueue = createInstanceLoadDataQueue()
+        case .sharedFull:
+            queue = type(of: self).getSharedFullQueue(qos: qos)
+            loadDataDispatchQueue = type(of: self).getSharedFullLoadDataQueue()
+        case .shared(let operationQueue, let loadDataQueue):
+            queue = operationQueue
+            loadDataDispatchQueue = loadDataQueue
         }
     }
     
