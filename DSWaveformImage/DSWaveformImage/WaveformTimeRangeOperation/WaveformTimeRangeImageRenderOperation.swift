@@ -175,7 +175,8 @@ fileprivate extension WaveformTimeRangeImageRenderOperation {
                                        completionHandler: @escaping (_ analysis: WaveformAnalysis?) -> Void) {
         let workItem = DispatchWorkItem(block: { [weak self] in
             guard let self = self,
-                  let assetReader = self.assetReader else {
+                  let assetReader = self.assetReader,
+                  requiredNumberOfSamples != 0 else {
                 completionHandler(nil)
                 return
             }
