@@ -190,8 +190,9 @@ class RenderCollectionView: UIView {
             let rightExcess = itemWidth
             // увеличиваем размер "окна" на leftEcxess и rightExcess, а также смещаем orgin "окна" влево на leftEcxess
             collectionViewContentOffset = CGPoint(x: collectionViewContentOffset.x - leftEcxess, y: collectionViewContentOffset.y)
-            collectionView.frame = CGRect(origin: collectionViewContentOffset,
-                                          size: CGSize(width: itemWidth + leftEcxess + rightExcess, height: bounds.size.height))
+            let collectionViewFrame = CGRect(origin: collectionViewContentOffset,
+                                             size: CGSize(width: itemWidth + leftEcxess + rightExcess, height: bounds.size.height))
+            collectionView.frame = collectionViewFrame
             collectionView.contentOffset = collectionViewContentOffset
         } else {
             collectionView.frame = CGRect(origin: CGPoint(x: 0, y: 0),
