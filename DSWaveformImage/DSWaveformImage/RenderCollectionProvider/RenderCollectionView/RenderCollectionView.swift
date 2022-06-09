@@ -165,7 +165,7 @@ class RenderCollectionView: UIView {
     
     private func requestMultiImagesForCell(_ cell: RenderMultiImagesCell, indexPath: IndexPath) {
         renderProvider?.getImages(for: indexPath.row,
-                                  size: getCellSize(for: indexPath)) { [weak self, weak cell] images, providerIndex in
+                                  size: getCellSize(for: indexPath)) { [weak cell] images, providerIndex in
             guard let cell = cell,
                   let images = images else { return }
             if providerIndex == cell.indexPath?.row {
