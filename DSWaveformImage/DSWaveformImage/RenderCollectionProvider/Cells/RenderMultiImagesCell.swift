@@ -99,6 +99,7 @@ final class RenderMultiImagesCell: RenderCell {
     }
     
     private func removeAllImages() {
+        self.images = []
         imageViews.forEach({ $0.removeFromSuperview() })
         imageViews.removeAll()
     }

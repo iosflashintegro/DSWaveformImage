@@ -49,6 +49,7 @@ class RenderCell: UICollectionViewCell {
     
     override func prepareForReuse() {
         super.prepareForReuse()
+        indexPath = nil
         onRederContentStart()
     }
     
