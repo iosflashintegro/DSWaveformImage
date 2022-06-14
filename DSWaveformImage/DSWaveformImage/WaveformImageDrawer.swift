@@ -18,7 +18,7 @@ public class WaveformImageDrawer {
         queue = OperationQueue()
         queue.maxConcurrentOperationCount = 1
         queue.qualityOfService = qos
-        queue.name = "WaveformImageDrawerOperation_" + NSUUID().uuidString
+        queue.name = "WaveformImageDrawerOperation_" + UUID().uuidString
     }
     
     deinit {
@@ -39,7 +39,7 @@ public class WaveformImageDrawer {
 
         let renderOperation = WaveformSamplesImageRenderOperation(sourceSamples: nil,
                                                                   configuration: configuration,
-                                                                  loadDataDispatchQueue: DispatchQueue(label: "WaveformImageDrawer" + NSUUID().uuidString),
+                                                                  loadDataDispatchQueue: DispatchQueue(label: "WaveformImageDrawer" + UUID().uuidString),
                                                                   completionHandler: { images in
             if let images = images {
                 completionHandler(images[safeIndex: 0])
@@ -73,7 +73,7 @@ extension WaveformImageDrawer {
                                                                          configuration: configuration,
                                                                          context: context,
                                                                          lastOffset: lastOffset,
-                                                                         loadDataDispatchQueue: DispatchQueue(label: "WaveformImageDrawer" + NSUUID().uuidString),
+                                                                         loadDataDispatchQueue: DispatchQueue(label: "WaveformImageDrawer" + UUID().uuidString),
                                                                          shouldDrawSilencePadding: shouldDrawSilencePadding)
         lastOffset = renderOperation.draw() // start on called thread
     }

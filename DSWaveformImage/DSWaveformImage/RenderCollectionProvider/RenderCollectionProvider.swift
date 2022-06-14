@@ -103,7 +103,7 @@ public class RenderCollectionProvider {
         queue.qualityOfService = qos
         
         let className = String(describing: self)
-        let queueName = className + "Queue_SharedFull_" + NSUUID().uuidString
+        let queueName = className + "Queue_SharedFull_" + UUID().uuidString
         queue.name = queueName
         
         return queue
@@ -136,7 +136,7 @@ public class RenderCollectionProvider {
     /// Creatae queue for loading data from resource, shared between all instance of current class
     class func createSharedFullLoadDataQueue() -> DispatchQueue {
         let className = String(describing: self)
-        let queueName = className + "LoadDataQueue_SharedFull_" + NSUUID().uuidString
+        let queueName = className + "LoadDataQueue_SharedFull_" + UUID().uuidString
         let queue = DispatchQueue(label: queueName, qos: .userInitiated)
         return queue
     }
@@ -150,7 +150,7 @@ public class RenderCollectionProvider {
         queue.qualityOfService = qos
         
         let className = String(describing: self)
-        let queueName = className + "Queue_Shared_" + NSUUID().uuidString
+        let queueName = className + "Queue_Shared_" + UUID().uuidString
         queue.name = queueName
         
         return queue
@@ -159,7 +159,7 @@ public class RenderCollectionProvider {
     /// Creatae queue for loading data from resource, shared between any instances of current class
     class func createSharedLoadDataQueue() -> DispatchQueue {
         let className = String(describing: self)
-        let queueName = className + "LoadDataQueue_Shared_" + NSUUID().uuidString
+        let queueName = className + "LoadDataQueue_Shared_" + UUID().uuidString
         let queue = DispatchQueue(label: queueName, qos: .userInitiated)
         return queue
     }
@@ -362,7 +362,7 @@ public class RenderCollectionProvider {
         queue.qualityOfService = qos
         
         let className = String(describing: self)
-        let queueName = className + NSUUID().uuidString
+        let queueName = className + UUID().uuidString
         queue.name = queueName
         
         return queue
@@ -371,7 +371,7 @@ public class RenderCollectionProvider {
     /// Creatae queue for loading data from resource, shared between all instance of current class
     private func createInstanceLoadDataQueue() -> DispatchQueue {
         let className = String(describing: self)
-        let queueName = className + NSUUID().uuidString
+        let queueName = className + UUID().uuidString
         let queue = DispatchQueue(label: queueName, qos: .userInitiated)
         return queue
     }
