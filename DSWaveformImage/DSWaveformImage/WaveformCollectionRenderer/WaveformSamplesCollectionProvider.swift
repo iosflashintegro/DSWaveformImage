@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 /// Provider for waveform created from samples
-public class WaveformSamplesCollectionProvider: RenderCollectionProvider {
+public class WaveformSamplesCollectionProvider: RenderAsyncCollectionProvider {
     
     // MARK: Static
     

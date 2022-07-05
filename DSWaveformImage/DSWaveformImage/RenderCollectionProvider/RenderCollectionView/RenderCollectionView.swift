@@ -62,11 +62,6 @@ class RenderCollectionView: UIView {
 
     // MARK: Override methods
     
-    /// Create data source for renderProvider
-    ///  - Note: override on children
-    func createRenderCollectionProvider(queueType: VideoPreviewCollectionProvider.QueueType) {
-    }
-    
     /// Calls on cell change frame
     func boundsUpdated() {
         updateCollectionViewContentOffset()

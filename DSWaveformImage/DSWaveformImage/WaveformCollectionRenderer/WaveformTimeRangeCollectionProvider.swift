@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 /// Provider for waveform created from URL
-public class WaveformTimeRangeCollectionProvider: RenderCollectionProvider {
+public class WaveformTimeRangeCollectionProvider: RenderAsyncCollectionProvider {
     
     // MARK: Static
     
