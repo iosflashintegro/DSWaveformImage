@@ -100,12 +100,7 @@ class RenderCollectionView: UIView {
     /// Setup current offset inside cell
     /// - Parameters: parentContentOffset - offset on parent view
     func setContentOffset(_ parentContentOffset: CGPoint) {
-        var localContentOffset = self.convert(parentContentOffset, from: superview)
-        if localContentOffset.x < 0 {
-            localContentOffset.x = 0
-        } else if localContentOffset.x > bounds.size.width {
-            localContentOffset.x = bounds.size.width
-        }
+        let localContentOffset = self.convert(parentContentOffset, from: superview)
         contentOffset = localContentOffset
         updateCollectionViewContentOffset()
     }
