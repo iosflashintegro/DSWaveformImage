@@ -103,7 +103,7 @@ class RenderCollectionView: UIView {
         var localContentOffset = self.convert(parentContentOffset, from: superview)
         if localContentOffset.x < 0 {
             localContentOffset.x = 0
-        } else if localContentOffset.y > bounds.size.width {
+        } else if localContentOffset.x > bounds.size.width {
             localContentOffset.x = bounds.size.width
         }
         contentOffset = localContentOffset
