@@ -144,11 +144,13 @@ class RenderCollectionView: UIView {
     private func requestSingleImageForCell(_ cell: RenderSingleImageCell, indexPath: IndexPath) {
         renderProvider?.getImages(for: indexPath.row,
                                   size: getCellSize(for: indexPath)) { [weak cell] images, providerIndex in
-            guard let cell = cell,
-                  let images = images,
-                  let image = images[safeIndex: 0] else { return }
-            if providerIndex == cell.indexPath?.row {
+            guard let cell = cell else { return }
+            if let images = images,
+               let image = images[safeIndex: 0],
+               providerIndex == cell.indexPath?.row {
                 cell.updateImage(image)
+            } else {
+                cell.updateImage(nil)
             }
         }
     }
@@ -156,10 +158,12 @@ class RenderCollectionView: UIView {
     private func requestMultiImagesForCell(_ cell: RenderMultiImagesCell, indexPath: IndexPath) {
         renderProvider?.getImages(for: indexPath.row,
                                   size: getCellSize(for: indexPath)) { [weak cell] images, providerIndex in
-            guard let cell = cell,
-                  let images = images else { return }
-            if providerIndex == cell.indexPath?.row {
+            guard let cell = cell else { return }
+            if let images = images,
+               providerIndex == cell.indexPath?.row {
                 cell.updateImages(images)
+            } else {
+                cell.updateImages([])
             }
         }
     }

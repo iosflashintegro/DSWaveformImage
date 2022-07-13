@@ -44,7 +44,7 @@ final class RenderSingleImageCell: RenderCell {
     }
     
     // MARK: Public methods
-    func updateImage(_ image: UIImage) {
+    func updateImage(_ image: UIImage?) {
         onRederContentReady()
         
         if imageView == nil {
