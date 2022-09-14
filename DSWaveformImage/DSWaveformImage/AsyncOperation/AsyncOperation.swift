@@ -53,7 +53,7 @@ extension AsyncOperation {
         super.cancel()
     }
     
-    open func markAsFinished() {
+    public func markAsFinished() {
         state = .finished
     }
 }
