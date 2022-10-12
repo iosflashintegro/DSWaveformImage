@@ -123,21 +123,21 @@ public class RenderAsyncCollectionProvider: RenderCollectionProvider {
     }
     
     /// Get sharedQueue
-    class func getSharedFullLoadDataQueue() -> DispatchQueue {
+    class func getSharedFullLoadDataQueue(qos: DispatchQoS = .userInitiated) -> DispatchQueue {
         if let queue = sharedFullLoadDataQueue {
             return queue
         } else {
-            let queue = createSharedFullLoadDataQueue()
+            let queue = createSharedFullLoadDataQueue(qos: qos)
             sharedFullLoadDataQueue = queue
             return queue
         }
     }
     
     /// Creatae queue for loading data from resource, shared between all instance of current class
-    class func createSharedFullLoadDataQueue() -> DispatchQueue {
+    class func createSharedFullLoadDataQueue(qos: DispatchQoS = .userInitiated) -> DispatchQueue {
         let className = String(describing: self)
         let queueName = className + "LoadDataQueue_SharedFull_" + UUID().uuidString
-        let queue = DispatchQueue(label: queueName, qos: .userInitiated)
+        let queue = DispatchQueue(label: queueName, qos: qos)
         return queue
     }
     
@@ -157,10 +157,10 @@ public class RenderAsyncCollectionProvider: RenderCollectionProvider {
     }
     
     /// Creatae queue for loading data from resource, shared between any instances of current class
-    class func createSharedLoadDataQueue() -> DispatchQueue {
+    class func createSharedLoadDataQueue(qos: DispatchQoS = .userInitiated) -> DispatchQueue {
         let className = String(describing: self)
         let queueName = className + "LoadDataQueue_Shared_" + UUID().uuidString
-        let queue = DispatchQueue(label: queueName, qos: .userInitiated)
+        let queue = DispatchQueue(label: queueName, qos: qos)
         return queue
     }
     
@@ -181,10 +181,10 @@ public class RenderAsyncCollectionProvider: RenderCollectionProvider {
         switch queueType {
         case .nonShared:
             queue = createInstanceQueue(qos: qos)
-            loadDataDispatchQueue = createInstanceLoadDataQueue()
+            loadDataDispatchQueue = createInstanceLoadDataQueue(qos: WaveformSupport.convertQoS(qos))
         case .sharedFull:
             queue = type(of: self).getSharedFullQueue(qos: qos)
-            loadDataDispatchQueue = type(of: self).getSharedFullLoadDataQueue()
+            loadDataDispatchQueue = type(of: self).getSharedFullLoadDataQueue(qos: WaveformSupport.convertQoS(qos))
         case .shared(let operationQueue, let loadDataQueue):
             queue = operationQueue
             loadDataDispatchQueue = loadDataQueue
@@ -367,10 +367,10 @@ public class RenderAsyncCollectionProvider: RenderCollectionProvider {
     }
     
     /// Creatae queue for loading data from resource, shared between all instance of current class
-    private func createInstanceLoadDataQueue() -> DispatchQueue {
+    private func createInstanceLoadDataQueue(qos: DispatchQoS = .userInitiated) -> DispatchQueue {
         let className = String(describing: self)
         let queueName = className + UUID().uuidString
-        let queue = DispatchQueue(label: queueName, qos: .userInitiated)
+        let queue = DispatchQueue(label: queueName, qos: qos)
         return queue
     }
     

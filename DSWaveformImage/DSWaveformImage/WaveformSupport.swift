@@ -10,9 +10,9 @@ import Foundation
 import UIKit
 
 struct WaveformSupport {
-    
-    static func convertQoS(_ sourceQoS: QualityOfService) -> DispatchQoS.QoSClass {
-        var targetQoS: DispatchQoS.QoSClass = .default
+
+    static func convertQoS(_ sourceQoS: QualityOfService) -> DispatchQoS {
+        var targetQoS: DispatchQoS = .default
         switch sourceQoS {
         case .userInteractive:
             targetQoS = .userInteractive
