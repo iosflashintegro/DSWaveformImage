@@ -110,8 +110,7 @@ class WaveformTimeRangeImageRenderOperation: AsyncOperation, RenderOperation {
                               samplesRange: RenderCollection.SamplesTimeRange,
                               renderCompletion: @escaping (_ images: [UIImage]?) -> Void) {
         let samplesCount = samplesRange.samplesCount
-        let timeRange = CMTimeRange(start: CMTime(seconds: samplesRange.startTime),
-                                    end: CMTime(seconds: samplesRange.endTime))
+        let timeRange = samplesRange.range
         assetReader?.timeRange = timeRange
         
         waveformSamples(count: samplesCount,

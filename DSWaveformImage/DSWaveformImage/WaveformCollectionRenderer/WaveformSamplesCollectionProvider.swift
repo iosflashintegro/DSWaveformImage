@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import AVKit
 
 /// Provider for waveform created from samples
 public class WaveformSamplesCollectionProvider: RenderAsyncCollectionProvider {
@@ -49,7 +50,7 @@ public class WaveformSamplesCollectionProvider: RenderAsyncCollectionProvider {
     /// Prepare array of samples
     public func prepareSamples(amplitudes: [Float],
                                newSamplesCount: Int,
-                               duration: TimeInterval,
+                               duration: CMTime,
                                collectionConfiguration: RenderCollection.CollectionConfiguration,
                                waveformConfiguration: Waveform.Configuration,
                                completionHandler: ((_ updatedChunkIndexes: [Int]?) -> Void)?) {

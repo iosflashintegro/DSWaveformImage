@@ -8,6 +8,8 @@
 
 import Foundation
 import UIKit
+import AVKit
+
 
 /// Provider for waveform created from URL
 public class WaveformTimeRangeCollectionProvider: RenderAsyncCollectionProvider {
@@ -56,7 +58,7 @@ public class WaveformTimeRangeCollectionProvider: RenderAsyncCollectionProvider 
 
         let trackDuration = TrackHelper.getDuration(url: url)
         let anAnalyzerOperation = WaveformTimeRangeAnalyzerOperation(url: url,
-                                                                     timeRange: 0...trackDuration,
+                                                                     timeRange: CMTimeRange(start: .zero, duration: trackDuration),
                                                                      collectionConfiguration: collectionConfiguration) { ranges in
             DispatchQueue.main.async { [weak self] in
                 guard let self = self, let ranges = ranges else { return }

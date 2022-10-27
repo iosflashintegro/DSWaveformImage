@@ -8,13 +8,14 @@
 
 import Foundation
 import UIKit
+import AVKit
 
 
 /// Calculates samples devided to chunk from linear samples
 public class WaveformSamplesAnalyzeChunkOperation: Operation {
     private var sourceSamples: [Float]
     private var newSamplesCount: Int = 0
-    private var duration: TimeInterval = 0
+    private var duration: CMTime = .zero
     private var collectionConfiguration: RenderCollection.CollectionConfiguration
     private var completionHandler: ((_ amplitudes: [[Float]]?, _ updatedChunkIndexes: [Int]?, _ ranges: [RenderCollection.SamplesTimeRange]?) -> Void)?
     
@@ -27,7 +28,7 @@ public class WaveformSamplesAnalyzeChunkOperation: Operation {
     /// - Parameter completionHandler: called from a background thread. Returns (the sampled result and index of updated chunk)  or nil in edge-error cases.
     public init(sourceSamples: [Float],
                 newSamplesCount: Int,
-                duration: TimeInterval,
+                duration: CMTime,
                 collectionConfiguration: RenderCollection.CollectionConfiguration,
                 completionHandler: ((_ amplitudes: [[Float]]?, _ updatedChunkIndexes: [Int]?, _ ranges: [RenderCollection.SamplesTimeRange]?) -> Void)?) {
         self.sourceSamples = sourceSamples
@@ -56,7 +57,7 @@ public class WaveformSamplesAnalyzeChunkOperation: Operation {
         outputChunkAmplitudes = sourceSamples.chunked(elementCounts: chunksCount)
         let updatedChunkIndexes = chunkIndexesForUpdatedSamles(count: newSamplesCount)
         
-        let timeRange: ClosedRange<TimeInterval> = 0...duration
+        let timeRange = CMTimeRange(start: .zero, duration: duration)
         outputTimeRanges = RenderCollection.createSamplesRanges(timeRange: timeRange,
                                                                 collectionConfiguration: collectionConfiguration)
         completionHandler?(outputChunkAmplitudes, updatedChunkIndexes, outputTimeRanges)

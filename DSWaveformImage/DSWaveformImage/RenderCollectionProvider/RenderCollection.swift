@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import AVKit
 
 public enum RenderCollection {
     
@@ -41,18 +42,17 @@ public enum RenderCollection {
     
     /// Range of track interval & samples count on that range
     public struct SamplesTimeRange {
-        let startTime: TimeInterval // url start interval
-        let endTime: TimeInterval   // url end interval
+        let range: CMTimeRange      // url start...end interval
         let samplesCount: Int       // samples count for generate at interval
     }
     
     
     /// Create array of SamplesTimeRange for target timeRange & CollectionConfiguration
-    static func createSamplesRanges(timeRange: ClosedRange<TimeInterval>,
+    static func createSamplesRanges(timeRange: CMTimeRange,
                                     collectionConfiguration: CollectionConfiguration) -> [SamplesTimeRange]? {
         // proportions for each collectionWidth
         let proportionallyParts = collectionConfiguration.itemsWidth.map { Double($0 / collectionConfiguration.collectionWidth) }
-        let chunkTimeRanges = ClosedRange<TimeInterval>.split(sourceRange: timeRange, proportionallyParts: proportionallyParts)
+        let chunkTimeRanges = timeRange.split(proportionallyParts: proportionallyParts)
         
         if chunkTimeRanges.count != collectionConfiguration.itemsWidth.count {
             return nil
@@ -61,8 +61,7 @@ public enum RenderCollection {
         var samplesRanges: [SamplesTimeRange] = []
         for (index, chunkTimeRange) in chunkTimeRanges.enumerated() {
             let samplesCount = Int(collectionConfiguration.itemsWidth[index])
-            let samplesRange = SamplesTimeRange(startTime: chunkTimeRange.lowerBound,
-                                                endTime: chunkTimeRange.upperBound,
+            let samplesRange = SamplesTimeRange(range: chunkTimeRange,
                                                 samplesCount: samplesCount)
             samplesRanges.append(samplesRange)
         }
