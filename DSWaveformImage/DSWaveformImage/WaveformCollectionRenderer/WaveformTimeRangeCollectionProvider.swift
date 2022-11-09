@@ -73,7 +73,7 @@ public class WaveformTimeRangeCollectionProvider: RenderAsyncCollectionProvider 
                                         renderData: Any?,
                                         size: CGSize,
                                         loadDataDispatchQueue: DispatchQueue,
-                                        completion: (([UIImage]?) -> Void)?) -> Operation? {
+                                        completion: ((RenderCell.ImagesDataSource?) -> Void)?) -> Operation? {
         guard let url = url else { return nil }
         var samplesTimeRange: RenderCollection.SamplesTimeRange?
         if let aRenderData = renderData {

@@ -39,9 +39,9 @@ class WaveformTimeRangeImageRenderOperation: AsyncOperation, RenderOperation {
     private var url: URL?
     private var _samplesTimeRange: RenderCollection.SamplesTimeRange?
     private var loadDataDispatchQueue: DispatchQueue
-    private var completionHandler: ((_ images: [UIImage]?) -> Void)?
+    private var completionHandler: ((_ imagesDataSource: RenderCell.ImagesDataSource?) -> Void)?
     
-    private var outputImages: [UIImage]?
+    private var outputImagesDataSource: RenderCell.ImagesDataSource?
     
     /// Makes sure we always look at the same samples while animating
     public var lastOffset: Int = 0
@@ -62,7 +62,7 @@ class WaveformTimeRangeImageRenderOperation: AsyncOperation, RenderOperation {
          waveformConfiguration: Waveform.Configuration,
          index: Int?,
          loadDataDispatchQueue: DispatchQueue,
-         completionHandler: ((_ image: [UIImage]?) -> Void)?) {
+         completionHandler: ((_ imagesDataSource: RenderCell.ImagesDataSource?) -> Void)?) {
         self.url = url
         self._samplesTimeRange = samplesTimeRange
         self.waveformConfiguration = waveformConfiguration
@@ -82,7 +82,7 @@ class WaveformTimeRangeImageRenderOperation: AsyncOperation, RenderOperation {
         guard let assetReader = try? AVAssetReader(asset: audioAsset),
               let assetTrack = audioAsset.tracks(withMediaType: .audio).first else {
                   print("ERROR loading asset / audio track")
-                  self.outputImages = nil
+                  self.outputImagesDataSource = nil
                   self.completionHandler?(nil)
                   self.markAsFinished()
                   return
@@ -93,8 +93,14 @@ class WaveformTimeRangeImageRenderOperation: AsyncOperation, RenderOperation {
         renderImages(url: url,
                      samplesRange: range) { [weak self] images in
             guard let self = self else { return }
-            self.outputImages = images
-            self.completionHandler?(self.outputImages)
+            if let images = images {
+                self.outputImagesDataSource = RenderCell.ImagesDataSource(images: images,
+                                                                          imageSize: nil)
+            } else {
+                self.outputImagesDataSource = nil
+            }
+            
+            self.completionHandler?(self.outputImagesDataSource)
             self.markAsFinished()
         }
     }
@@ -549,8 +555,8 @@ private extension WaveformTimeRangeImageRenderOperation {
 
 // MARK: ImageRenderOutputPass
 extension WaveformTimeRangeImageRenderOperation: ImageRenderOutputPass {
-    var images: [UIImage]? {
-        return outputImages
+    var imagesDataSource: RenderCell.ImagesDataSource? {
+        return outputImagesDataSource
     }
 }
 
@@ -566,7 +572,7 @@ extension WaveformTimeRangeImageRenderOperation: NSCopying {
                                                          loadDataDispatchQueue: self.loadDataDispatchQueue,
                                                          completionHandler: self.completionHandler)
         copy.index = self.index
-        copy.outputImages = self.outputImages
+        copy.outputImagesDataSource = self.outputImagesDataSource
         return copy
     }
 }

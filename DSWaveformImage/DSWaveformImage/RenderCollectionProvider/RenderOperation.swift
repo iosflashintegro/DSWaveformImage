@@ -11,7 +11,7 @@ import UIKit
 
 /// Output protocol for RenderOperation
 protocol ImageRenderOutputPass {
-    var images: [UIImage]? { get }
+    var imagesDataSource: RenderCell.ImagesDataSource? { get }
 }
 
 /// Base class for image render operation

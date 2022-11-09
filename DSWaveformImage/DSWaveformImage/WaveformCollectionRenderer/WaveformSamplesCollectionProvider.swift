@@ -74,7 +74,7 @@ public class WaveformSamplesCollectionProvider: RenderAsyncCollectionProvider {
                                         renderData: Any?,
                                         size: CGSize,
                                         loadDataDispatchQueue: DispatchQueue,
-                                        completion: (([UIImage]?) -> Void)?) -> Operation? {
+                                        completion: ((RenderCell.ImagesDataSource?) -> Void)?) -> Operation? {
         var samplesAtIndex: [Float]?
         if let aRenderData = renderData {
             if let aSamplesAtIndex = aRenderData as? [Float] {

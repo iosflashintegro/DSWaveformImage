@@ -23,7 +23,6 @@ final class RenderMultiImagesCell: RenderCell {
     
     // MARK: Private properties
     private var imageViews = [UIImageView]()
-    private var images = [UIImage]()
     
     // MARK: Init
     required init?(coder aDecoder: NSCoder) {
@@ -52,19 +51,28 @@ final class RenderMultiImagesCell: RenderCell {
         super.clearRenderContent()
         removeAllImages()
     }
- 
-    // MARK: Public methods
-    func updateImages(_ images: [UIImage]) {
+
+    /// Update render content
+    override func updateImages(_ imagesDataSource: ImagesDataSource?) {
         onRederContentReady()
-        self.images = images
+        super.updateImages(imagesDataSource)
         drawImages()
     }
     
     // MARK: Private methods
     
     private func drawImages() {
-        let imageCount = images.count
-        let imageWidth = (bounds.size.width - 2 * Const.Preview.edgeDistance - Const.Preview.distanceBetwenImages * CGFloat(imageCount - 1)) / CGFloat(imageCount)
+        guard let images = imagesDataSource?.images else { return }
+
+        let imageWidth: CGFloat // ширина каждой картинки
+        if let imageSize = imagesDataSource?.imageSize {
+            // if the dimensions of the image are set externally, set this value
+            imageWidth = imageSize.width
+        } else {
+            // if the images' dimensions are not set, all images will have equal width
+            let imageCount = images.count
+            imageWidth = (bounds.size.width - 2 * Const.Preview.edgeDistance - Const.Preview.distanceBetwenImages * CGFloat(imageCount - 1)) / CGFloat(imageCount)
+        }
         
         for (index, image) in images.enumerated() {
             let item = UIImageView()
@@ -99,7 +107,6 @@ final class RenderMultiImagesCell: RenderCell {
     }
     
     private func removeAllImages() {
-        self.images = []
         imageViews.forEach({ $0.removeFromSuperview() })
         imageViews.removeAll()
     }

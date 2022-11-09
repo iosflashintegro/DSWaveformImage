@@ -220,8 +220,8 @@ public class RenderAsyncCollectionProvider: RenderCollectionProvider {
     /// Get image for target index
     public override func getImages(for index: Int,
                                    size: CGSize,
-                                   completionHandler: ((_ image: [UIImage]?, _ index: Int) -> Void)?) {
-        let completion: ([UIImage]?) -> Void = { image in
+                                   completionHandler: ((_ imagesDataSource: RenderCell.ImagesDataSource?, _ index: Int) -> Void)?) {
+        let completion: (RenderCell.ImagesDataSource?) -> Void = { image in
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else {
                     completionHandler?(nil, index)
@@ -263,10 +263,10 @@ public class RenderAsyncCollectionProvider: RenderCollectionProvider {
         }
         
         guard let renderOperation = createRenderOperation(for: index,
-                                                             renderData: renderSource.getData(),
-                                                             size: size,
-                                                             loadDataDispatchQueue: loadDataDispatchQueue,
-                                                             completion: completion) else {
+                                                          renderData: renderSource.getData(),
+                                                          size: size,
+                                                          loadDataDispatchQueue: loadDataDispatchQueue,
+                                                          completion: completion) else {
             completion(nil)
             return
         }
@@ -306,7 +306,7 @@ public class RenderAsyncCollectionProvider: RenderCollectionProvider {
                                renderData: Any?,
                                size: CGSize,
                                loadDataDispatchQueue: DispatchQueue,
-                               completion: (([UIImage]?) -> Void)?) -> Operation? {
+                               completion: ((RenderCell.ImagesDataSource?) -> Void)?) -> Operation? {
         return nil
     }
 

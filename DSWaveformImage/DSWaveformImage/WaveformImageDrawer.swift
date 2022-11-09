@@ -40,9 +40,9 @@ public class WaveformImageDrawer {
         let renderOperation = WaveformSamplesImageRenderOperation(sourceSamples: nil,
                                                                   configuration: configuration,
                                                                   loadDataDispatchQueue: DispatchQueue(label: "WaveformImageDrawer" + UUID().uuidString),
-                                                                  completionHandler: { images in
-            if let images = images {
-                completionHandler(images[safeIndex: 0])
+                                                                  completionHandler: { imagesDataSouece in
+            if let imagesDataSouece = imagesDataSouece {
+                completionHandler(imagesDataSouece.images[safeIndex: 0])
             } else {
                 completionHandler(nil)
             }

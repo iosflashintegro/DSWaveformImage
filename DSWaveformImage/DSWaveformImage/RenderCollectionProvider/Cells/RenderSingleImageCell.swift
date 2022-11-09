@@ -43,10 +43,23 @@ final class RenderSingleImageCell: RenderCell {
         imageView = nil
     }
     
-    // MARK: Public methods
-    func updateImage(_ image: UIImage?) {
+    /// Update render content
+    override func updateImages(_ imagesDataSource: ImagesDataSource?) {
         onRederContentReady()
-        
+        super.updateImages(imagesDataSource)
+        drawImage()
+    }
+
+    
+    // MARK: Private methods
+    
+    private func drawImage() {
+        createImageViewIfNeeded()
+        let image = imagesDataSource?.images[safeIndex: 0]
+        imageView?.image = image
+    }
+    
+    private func createImageViewIfNeeded() {
         if imageView == nil {
             let anImageView = UIImageView()
             contentView.addSubview(anImageView)
@@ -55,6 +68,5 @@ final class RenderSingleImageCell: RenderCell {
             anImageView.heightAnchor.constraint(equalTo: contentView.heightAnchor).isActive = true
             imageView = anImageView
         }
-        imageView?.image = image
     }
 }

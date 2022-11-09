@@ -29,7 +29,7 @@ public class RenderCollectionProvider {
     /// - Note: Override on subclasses
     public func getImages(for index: Int,
                           size: CGSize,
-                          completionHandler: ((_ image: [UIImage]?, _ index: Int) -> Void)?) {
+                          completionHandler: ((_ imagesDataSource: RenderCell.ImagesDataSource?, _ index: Int) -> Void)?) {
     }
     
     /// Cancel image generation at index
