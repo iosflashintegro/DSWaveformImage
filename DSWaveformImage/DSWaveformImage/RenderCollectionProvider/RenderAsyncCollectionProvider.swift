@@ -221,7 +221,7 @@ public class RenderAsyncCollectionProvider: RenderCollectionProvider {
     public override func getImages(for index: Int,
                                    size: CGSize,
                                    completionHandler: ((_ imagesDataSource: RenderCell.ImagesDataSource?, _ index: Int) -> Void)?) {
-        let completion: (RenderCell.ImagesDataSource?) -> Void = { image in
+        let completion: (RenderCell.ImagesDataSource?) -> Void = { imagesDataSource in
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else {
                     completionHandler?(nil, index)
@@ -229,7 +229,7 @@ public class RenderAsyncCollectionProvider: RenderCollectionProvider {
                 }
                 // before call completionHandler, clear renderOperations for index
                 self.renderOperations[index] = nil
-                completionHandler?(image, index)
+                completionHandler?(imagesDataSource, index)
             }
         }
 
