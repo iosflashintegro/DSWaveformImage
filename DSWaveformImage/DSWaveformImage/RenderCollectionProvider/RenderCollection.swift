@@ -22,6 +22,12 @@ public enum RenderCollection {
             return itemsWidth.count
         }
         
+        /// square size for tile
+        public var squareTileSize: CGSize {
+            return CGSize(width: collectionHeight, height: collectionHeight)
+        }
+
+        
         public init(collectionWidth: CGFloat = 0,
                     collectionHeight: CGFloat = 0,
                     itemsWidth: [CGFloat] = []) {
