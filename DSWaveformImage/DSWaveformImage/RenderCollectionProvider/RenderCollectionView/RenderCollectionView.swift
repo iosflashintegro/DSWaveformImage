@@ -25,8 +25,6 @@ class RenderCollectionView: UIView {
     var collectionConfiguration = RenderCollection.CollectionConfiguration(collectionWidth: 0,
                                                                            collectionHeight: 0,
                                                                            itemWidth: 0)
-    var totalWidth: CGFloat = 0
-    var itemWidth: CGFloat = 0
     var renderType: ImageRenderType = .single
     var cellEmptyStyle: RenderCell.EmptyStyle = .empty
     
@@ -76,8 +74,6 @@ class RenderCollectionView: UIView {
         collectionConfiguration = RenderCollection.CollectionConfiguration(collectionWidth: totalWidth,
                                                                            collectionHeight: self.bounds.size.height,
                                                                            itemWidth: itemWidth)
-        self.totalWidth = totalWidth
-        self.itemWidth = itemWidth
         self.renderType = renderType
         self.cellEmptyStyle = cellEmptyStyle
         
@@ -164,6 +160,8 @@ class RenderCollectionView: UIView {
     
     /// Update size and contentOffset inside collectionView for current value of view's contentOffset
     private func updateCollectionViewContentOffset() {
+        let itemWidth = collectionConfiguration.itemWidth
+        let totalWidth = collectionConfiguration.collectionWidth
         if isChunkGenerationEnable && itemWidth < totalWidth {
             var collectionViewContentOffset: CGPoint = .zero    // смещение origin отображаемого "окна" collectionView
             if contentOffset.x < 0 {
