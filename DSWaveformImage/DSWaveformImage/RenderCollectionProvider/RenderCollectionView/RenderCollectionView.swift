@@ -67,13 +67,10 @@ class RenderCollectionView: UIView {
     
     // MARK: Public Methods
     
-    func configure(totalWidth: CGFloat,
-                   itemWidth: CGFloat,
+    func configure(collectionConfiguration: RenderCollection.CollectionConfiguration,
                    renderType: ImageRenderType,
                    cellEmptyStyle: RenderCell.EmptyStyle) {
-        collectionConfiguration = RenderCollection.CollectionConfiguration(collectionWidth: totalWidth,
-                                                                           collectionHeight: self.bounds.size.height,
-                                                                           itemWidth: itemWidth)
+        self.collectionConfiguration = collectionConfiguration
         self.renderType = renderType
         self.cellEmptyStyle = cellEmptyStyle
         
