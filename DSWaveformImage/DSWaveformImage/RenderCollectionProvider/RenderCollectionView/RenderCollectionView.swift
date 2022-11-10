@@ -24,7 +24,7 @@ class RenderCollectionView: UIView {
     var collectionView: UICollectionView!
     var collectionConfiguration = RenderCollection.CollectionConfiguration(collectionWidth: 0,
                                                                            collectionHeight: 0,
-                                                                           itemsWidth: [])
+                                                                           itemWidth: 0)
     var totalWidth: CGFloat = 0
     var itemWidth: CGFloat = 0
     var renderType: ImageRenderType = .single
@@ -73,12 +73,9 @@ class RenderCollectionView: UIView {
                    itemWidth: CGFloat,
                    renderType: ImageRenderType,
                    cellEmptyStyle: RenderCell.EmptyStyle) {
-        
-        let itemsWidth = WaveformSupport.devideSegment(segmentWidth: totalWidth,
-                                                       itemWidth: itemWidth)
         collectionConfiguration = RenderCollection.CollectionConfiguration(collectionWidth: totalWidth,
                                                                            collectionHeight: self.bounds.size.height,
-                                                                           itemsWidth: itemsWidth)
+                                                                           itemWidth: itemWidth)
         self.totalWidth = totalWidth
         self.itemWidth = itemWidth
         self.renderType = renderType

@@ -20,7 +20,7 @@ public class RenderCollectionProvider {
     public init() {
         collectionConfiguration = RenderCollection.CollectionConfiguration(collectionWidth: 0,
                                                                            collectionHeight: 0,
-                                                                           itemsWidth: [])
+                                                                           itemWidth: 0)
     }
     
     // MARK: Public methods

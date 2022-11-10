@@ -33,6 +33,9 @@ struct WaveformSupport {
     /// Devide segment into parts with part's width
     static func devideSegment(segmentWidth: CGFloat,
                               itemWidth: CGFloat) -> [CGFloat] {
+        if segmentWidth <= 0 || itemWidth <= 0 {
+            return []
+        }
         if itemWidth >= segmentWidth {
             return [segmentWidth]
         }

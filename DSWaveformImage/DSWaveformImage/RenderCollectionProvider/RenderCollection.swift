@@ -16,7 +16,8 @@ public enum RenderCollection {
     public struct CollectionConfiguration {
         public let collectionWidth: CGFloat
         public let collectionHeight: CGFloat
-        public let itemsWidth: [CGFloat]
+        public let itemWidth: CGFloat           // the width of the element into which the entire width will be split
+        public let itemsWidth: [CGFloat]        // the width of all the elements into which we divide collectionWidth
         
         public var itemsCount: Int {
             return itemsWidth.count
@@ -30,18 +31,20 @@ public enum RenderCollection {
         
         public init(collectionWidth: CGFloat = 0,
                     collectionHeight: CGFloat = 0,
-                    itemsWidth: [CGFloat] = []) {
+                    itemWidth: CGFloat) {
             self.collectionWidth = collectionWidth
             self.collectionHeight = collectionHeight
-            self.itemsWidth = itemsWidth
+            self.itemWidth = itemWidth
+            self.itemsWidth = WaveformSupport.devideSegment(segmentWidth: collectionWidth,
+                                                            itemWidth: itemWidth)
         }
         
         public func with(collectionWidth: CGFloat? = nil,
                          collectionHeight: CGFloat? = nil,
-                         itemsWidth: [CGFloat]? = nil) -> CollectionConfiguration {
+                         itemWidth: CGFloat? = nil) -> CollectionConfiguration {
             return CollectionConfiguration(collectionWidth: collectionWidth ?? self.collectionWidth,
                                            collectionHeight: collectionHeight ?? self.collectionHeight,
-                                           itemsWidth: itemsWidth ?? self.itemsWidth)
+                                           itemWidth: itemWidth ?? self.itemWidth)
         }
     }
     
