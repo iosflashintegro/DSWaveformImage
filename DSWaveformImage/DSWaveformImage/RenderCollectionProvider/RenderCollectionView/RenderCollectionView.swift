@@ -109,7 +109,7 @@ class RenderCollectionView: UIView {
         collectionView.showsVerticalScrollIndicator = false
         collectionView.backgroundColor = .clear
         collectionView.isScrollEnabled = false
-        collectionView.clipsToBounds = false
+        collectionView.clipsToBounds = true
         collectionView.allowsSelection = false
         
         collectionView.dataSource = self
