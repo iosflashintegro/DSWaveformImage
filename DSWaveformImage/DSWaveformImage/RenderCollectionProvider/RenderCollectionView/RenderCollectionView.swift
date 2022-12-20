@@ -176,7 +176,9 @@ class RenderCollectionView: UIView {
             let collectionViewFrame = CGRect(origin: collectionViewContentOffset,
                                              size: CGSize(width: itemWidth + leftEcxess + rightExcess, height: bounds.size.height))
             collectionView.frame = collectionViewFrame
-            collectionView.contentOffset = collectionViewContentOffset
+            // важно! устанавливаем смещение через collectionView.contentOffset(_:, animated:), т.к. если установить через collectionView.contenteOffset =,
+            // то на ios 16.2 смещение будет анимировано
+            collectionView.setContentOffset(collectionViewContentOffset, animated: false)
         } else {
             collectionView.frame = CGRect(origin: CGPoint(x: 0, y: 0),
                                           size: bounds.size)
