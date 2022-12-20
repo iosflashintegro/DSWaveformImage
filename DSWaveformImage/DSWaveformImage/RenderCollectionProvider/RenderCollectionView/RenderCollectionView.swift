@@ -160,17 +160,10 @@ class RenderCollectionView: UIView {
         let itemWidth = collectionConfiguration.itemWidth
         let totalWidth = collectionConfiguration.collectionWidth
         if isChunkGenerationEnable && itemWidth < totalWidth {
-            var collectionViewContentOffset: CGPoint = .zero    // смещение origin отображаемого "окна" collectionView
-            if contentOffset.x < 0 {
-                collectionViewContentOffset = .zero
-            } else if contentOffset.x > (bounds.size.width - itemWidth) {
-                collectionViewContentOffset = CGPoint(x: (bounds.size.width - itemWidth), y: 0)
-            } else {
-                collectionViewContentOffset = CGPoint(x: contentOffset.x, y: 0)
-            }
-            
-            let leftEcxess = itemWidth
-            let rightExcess = itemWidth
+            var collectionViewContentOffset = contentOffset     // смещение origin отображаемого "окна" collectionView
+
+            let leftEcxess = itemWidth/2
+            let rightExcess = itemWidth/2
             // увеличиваем размер "окна" на leftEcxess и rightExcess, а также смещаем orgin "окна" влево на leftEcxess
             collectionViewContentOffset = CGPoint(x: collectionViewContentOffset.x - leftEcxess, y: collectionViewContentOffset.y)
             let collectionViewFrame = CGRect(origin: collectionViewContentOffset,
@@ -181,7 +174,7 @@ class RenderCollectionView: UIView {
             collectionView.setContentOffset(collectionViewContentOffset, animated: false)
         } else {
             collectionView.frame = CGRect(origin: CGPoint(x: 0, y: 0),
-                                          size: bounds.size)
+                                      size: bounds.size)
         }
         self.layoutIfNeeded()
     }
