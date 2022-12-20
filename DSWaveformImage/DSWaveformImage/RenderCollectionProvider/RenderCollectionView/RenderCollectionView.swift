@@ -160,7 +160,9 @@ class RenderCollectionView: UIView {
         let itemWidth = collectionConfiguration.itemWidth
         let totalWidth = collectionConfiguration.collectionWidth
         if isChunkGenerationEnable && itemWidth < totalWidth {
-            var collectionViewContentOffset = contentOffset     // смещение origin отображаемого "окна" collectionView
+            // смещение origin отображаемого "окна" collectionView
+            // (здесь не приравниваем collectionViewContentOffset = contentOffset, т.к. contentOffset.y может быть не 0 )
+            var collectionViewContentOffset = CGPoint(x: contentOffset.x, y: 0)
 
             let leftEcxess = itemWidth/2
             let rightExcess = itemWidth/2
