@@ -179,6 +179,7 @@ class RenderCollectionView: UIView {
                                       size: bounds.size)
         }
         self.layoutIfNeeded()
+        self.setNeedsLayout()
     }
     
     /// Return cell's identificator for cell type
