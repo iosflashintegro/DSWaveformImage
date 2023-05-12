@@ -56,7 +56,7 @@ public class WaveformTimeRangeCollectionProvider: RenderAsyncCollectionProvider 
         self.waveformConfiguration = waveformConfiguration
         self.collectionConfiguration = collectionConfiguration
 
-        let trackDuration = TrackHelper.getDuration(url: url)
+        let trackDuration = TrackHelper.getAudioDuration(url: url)
         let anAnalyzerOperation = WaveformTimeRangeAnalyzerOperation(url: url,
                                                                      timeRange: CMTimeRange(start: .zero, duration: trackDuration),
                                                                      collectionConfiguration: collectionConfiguration) { ranges in
