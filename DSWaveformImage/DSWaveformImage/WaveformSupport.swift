@@ -50,4 +50,23 @@ struct WaveformSupport {
         return itemsWidth
     }
     
+    /// Devide segment into parts with part's width
+    static func devideSegment(segmentWidth: Int,
+                              itemWidth: Int) -> [Int] {
+        if segmentWidth <= 0 || itemWidth <= 0 {
+            return []
+        }
+        if itemWidth >= segmentWidth {
+            return [segmentWidth]
+        }
+        
+        let itemsCount = Int(segmentWidth / itemWidth)
+        var itemsWidth: [Int] = Array(repeating: itemWidth, count: itemsCount)
+
+        let remaider = segmentWidth % itemWidth
+        if remaider != 0 {
+            itemsWidth.append(remaider)
+        }
+        return itemsWidth
+    }
 }
