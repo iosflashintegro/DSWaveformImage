@@ -50,15 +50,15 @@ public class WaveformTimeRangeCollectionProvider: RenderAsyncCollectionProvider 
     
     /// Analyze audio from url & load all samples
     public func prepareSamples(url: URL,
+                               timeRange: CMTimeRange,
                                collectionConfiguration: RenderCollection.CollectionConfiguration,
                                waveformConfiguration: Waveform.Configuration) {
         self.url = url
         self.waveformConfiguration = waveformConfiguration
         self.collectionConfiguration = collectionConfiguration
 
-        let trackDuration = TrackHelper.getAudioDuration(url: url)
         let anAnalyzerOperation = WaveformTimeRangeAnalyzerOperation(url: url,
-                                                                     timeRange: CMTimeRange(start: .zero, duration: trackDuration),
+                                                                     timeRange: timeRange,
                                                                      collectionConfiguration: collectionConfiguration) { ranges in
             DispatchQueue.main.async { [weak self] in
                 guard let self = self, let ranges = ranges else { return }
