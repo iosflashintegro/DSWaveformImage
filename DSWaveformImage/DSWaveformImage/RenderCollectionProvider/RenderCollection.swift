@@ -14,6 +14,7 @@ public enum RenderCollection {
     
     /// Configuration for RenderCollectionProvider
     public struct CollectionConfiguration {
+        public let visibleAreaWidth: CGFloat    // width of visible area of timelene
         public let collectionWidth: CGFloat
         public let collectionHeight: CGFloat
         public let itemWidth: CGFloat           // the width of the element into which the entire width will be split
@@ -29,9 +30,11 @@ public enum RenderCollection {
         }
 
         
-        public init(collectionWidth: CGFloat = 0,
+        public init(visibleAreaWidth: CGFloat = 0,
+                    collectionWidth: CGFloat = 0,
                     collectionHeight: CGFloat = 0,
                     itemWidth: CGFloat) {
+            self.visibleAreaWidth = visibleAreaWidth
             self.collectionWidth = collectionWidth
             self.collectionHeight = collectionHeight
             self.itemWidth = itemWidth
@@ -39,10 +42,12 @@ public enum RenderCollection {
                                                             itemWidth: itemWidth)
         }
         
-        public func with(collectionWidth: CGFloat? = nil,
+        public func with(visibleAreaWidth: CGFloat? = nil,
+                         collectionWidth: CGFloat? = nil,
                          collectionHeight: CGFloat? = nil,
                          itemWidth: CGFloat? = nil) -> CollectionConfiguration {
-            return CollectionConfiguration(collectionWidth: collectionWidth ?? self.collectionWidth,
+            return CollectionConfiguration(visibleAreaWidth: visibleAreaWidth ?? self.visibleAreaWidth,
+                                           collectionWidth: collectionWidth ?? self.collectionWidth,
                                            collectionHeight: collectionHeight ?? self.collectionHeight,
                                            itemWidth: itemWidth ?? self.itemWidth)
         }

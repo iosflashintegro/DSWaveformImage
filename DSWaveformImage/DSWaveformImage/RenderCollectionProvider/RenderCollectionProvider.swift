@@ -18,7 +18,8 @@ public class RenderCollectionProvider {
     // MARK: Constructor/Destructor/Init
     
     public init() {
-        collectionConfiguration = RenderCollection.CollectionConfiguration(collectionWidth: 0,
+        collectionConfiguration = RenderCollection.CollectionConfiguration(visibleAreaWidth: 0,
+                                                                           collectionWidth: 0,
                                                                            collectionHeight: 0,
                                                                            itemWidth: 0)
     }

@@ -22,7 +22,8 @@ class RenderCollectionView: UIView {
     var renderProvider: RenderCollectionProvider?
     var flowLayout = UICollectionViewFlowLayout()
     var collectionView: UICollectionView!
-    var collectionConfiguration = RenderCollection.CollectionConfiguration(collectionWidth: 0,
+    var collectionConfiguration = RenderCollection.CollectionConfiguration(visibleAreaWidth: 0,
+                                                                           collectionWidth: 0,
                                                                            collectionHeight: 0,
                                                                            itemWidth: 0)
     var renderType: ImageRenderType = .single
@@ -162,12 +163,15 @@ class RenderCollectionView: UIView {
             // (здесь не приравниваем collectionViewContentOffset = contentOffset, т.к. contentOffset.y может быть не 0 )
             var collectionViewContentOffset = CGPoint(x: contentOffset.x, y: 0)
 
-            let leftEcxess = itemWidth/2
-            let rightExcess = itemWidth/2
+            // основно размер "окна" - ширина видимой области таймлайна
+            let windowWidth = collectionConfiguration.visibleAreaWidth
+            let leftEcxess = windowWidth/2
+            let rightExcess = windowWidth/2
+
             // увеличиваем размер "окна" на leftEcxess и rightExcess, а также смещаем orgin "окна" влево на leftEcxess
             collectionViewContentOffset = CGPoint(x: collectionViewContentOffset.x - leftEcxess, y: collectionViewContentOffset.y)
             let collectionViewFrame = CGRect(origin: collectionViewContentOffset,
-                                             size: CGSize(width: itemWidth + leftEcxess + rightExcess, height: bounds.size.height))
+                                             size: CGSize(width: windowWidth + leftEcxess + rightExcess, height: bounds.size.height))
             collectionView.frame = collectionViewFrame
             // важно! устанавливаем смещение через collectionView.contentOffset(_:, animated:), т.к. если установить через collectionView.contenteOffset =,
             // то на ios 16.2 смещение будет анимировано
