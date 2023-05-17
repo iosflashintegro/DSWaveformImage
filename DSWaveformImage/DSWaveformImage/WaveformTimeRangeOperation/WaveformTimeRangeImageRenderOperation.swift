@@ -39,9 +39,9 @@ class WaveformTimeRangeImageRenderOperation: AsyncOperation, RenderOperation {
     private var url: URL?
     private var _samplesTimeRange: RenderCollection.SamplesTimeRange?
     private var loadDataDispatchQueue: DispatchQueue
-    private var completionHandler: ((_ imagesDataSource: RenderCell.ImagesDataSource?) -> Void)?
+    private var completionHandler: ((_ imagesDataSource: RenderCellData.ImagesSource?) -> Void)?
     
-    private var outputImagesDataSource: RenderCell.ImagesDataSource?
+    private var outputImagesDataSource: RenderCellData.ImagesSource?
     
     /// Makes sure we always look at the same samples while animating
     public var lastOffset: Int = 0
@@ -62,7 +62,7 @@ class WaveformTimeRangeImageRenderOperation: AsyncOperation, RenderOperation {
          waveformConfiguration: Waveform.Configuration,
          index: Int?,
          loadDataDispatchQueue: DispatchQueue,
-         completionHandler: ((_ imagesDataSource: RenderCell.ImagesDataSource?) -> Void)?) {
+         completionHandler: ((_ imagesDataSource: RenderCellData.ImagesSource?) -> Void)?) {
         self.url = url
         self._samplesTimeRange = samplesTimeRange
         self.waveformConfiguration = waveformConfiguration
@@ -94,7 +94,7 @@ class WaveformTimeRangeImageRenderOperation: AsyncOperation, RenderOperation {
                      samplesRange: range) { [weak self] images in
             guard let self = self else { return }
             if let images = images {
-                self.outputImagesDataSource = RenderCell.ImagesDataSource(images: images,
+                self.outputImagesDataSource = RenderCellData.ImagesSource(images: images,
                                                                           imageSize: nil)
             } else {
                 self.outputImagesDataSource = nil
@@ -555,7 +555,7 @@ private extension WaveformTimeRangeImageRenderOperation {
 
 // MARK: ImageRenderOutputPass
 extension WaveformTimeRangeImageRenderOperation: ImageRenderOutputPass {
-    var imagesDataSource: RenderCell.ImagesDataSource? {
+    var imagesDataSource: RenderCellData.ImagesSource? {
         return outputImagesDataSource
     }
 }

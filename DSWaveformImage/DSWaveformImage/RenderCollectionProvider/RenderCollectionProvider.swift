@@ -30,7 +30,7 @@ public class RenderCollectionProvider {
     /// - Note: Override on subclasses
     public func getImages(for index: Int,
                           size: CGSize,
-                          completionHandler: ((_ imagesDataSource: RenderCell.ImagesDataSource?, _ index: Int) -> Void)?) {
+                          completionHandler: ((_ imagesDataSource: RenderCellData.ImagesSource?, _ index: Int) -> Void)?) {
     }
     
     /// Cancel image generation at index

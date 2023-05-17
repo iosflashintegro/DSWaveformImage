@@ -26,8 +26,8 @@ public class WaveformSamplesImageRenderOperation: Operation, RenderOperation {
     // MARK: Private properties
     private var _sourceSamples: [Float]?
     private var loadDataDispatchQueue: DispatchQueue
-    private var completionHandler: ((_ imagesDataSouece: RenderCell.ImagesDataSource?) -> Void)?
-    private var outputImagesDataSource: RenderCell.ImagesDataSource?
+    private var completionHandler: ((_ imagesDataSouece: RenderCellData.ImagesSource?) -> Void)?
+    private var outputImagesDataSource: RenderCellData.ImagesSource?
     
     /// Makes sure we always look at the same samples while animating
     public var lastOffset: Int = 0
@@ -35,7 +35,7 @@ public class WaveformSamplesImageRenderOperation: Operation, RenderOperation {
     public init(sourceSamples: [Float]? = nil,
                 configuration: Waveform.Configuration,
                 loadDataDispatchQueue: DispatchQueue,
-                completionHandler: ((_ imagesDataSouece: RenderCell.ImagesDataSource?) -> Void)?) {
+                completionHandler: ((_ imagesDataSouece: RenderCellData.ImagesSource?) -> Void)?) {
         self._sourceSamples = sourceSamples
         self.configuration = configuration
         self.loadDataDispatchQueue = loadDataDispatchQueue
@@ -46,7 +46,7 @@ public class WaveformSamplesImageRenderOperation: Operation, RenderOperation {
                 configuration: Waveform.Configuration,
                 index: Int,
                 loadDataDispatchQueue: DispatchQueue,
-                completionHandler: ((_ imagesDataSouece: RenderCell.ImagesDataSource?) -> Void)?) {
+                completionHandler: ((_ imagesDataSouece: RenderCellData.ImagesSource?) -> Void)?) {
         self._sourceSamples = sourceSamples
         self.configuration = configuration
         self.loadDataDispatchQueue = loadDataDispatchQueue
@@ -63,7 +63,7 @@ public class WaveformSamplesImageRenderOperation: Operation, RenderOperation {
             return
         }
         if let image = render(samples: samples, with: configuration) {
-            outputImagesDataSource = RenderCell.ImagesDataSource(images: [image],
+            outputImagesDataSource = RenderCellData.ImagesSource(images: [image],
                                                                  imageSize: nil)
         } else {
             outputImagesDataSource = nil
@@ -245,7 +245,7 @@ private extension WaveformSamplesImageRenderOperation {
 // MARK: - ImageRenderOutputPass
 
 extension WaveformSamplesImageRenderOperation: ImageRenderOutputPass {
-    var imagesDataSource: RenderCell.ImagesDataSource? {
+    var imagesDataSource: RenderCellData.ImagesSource? {
         return outputImagesDataSource
     }
 }

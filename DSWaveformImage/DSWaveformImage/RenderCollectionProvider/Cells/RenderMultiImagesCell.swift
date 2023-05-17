@@ -53,7 +53,7 @@ final class RenderMultiImagesCell: RenderCell {
     }
 
     /// Update render content
-    override func updateImages(_ imagesDataSource: ImagesDataSource?) {
+    override func updateImages(_ imagesDataSource: RenderCellData.ImagesSource?) {
         onRederContentReady()
         super.updateImages(imagesDataSource)
         drawImages()

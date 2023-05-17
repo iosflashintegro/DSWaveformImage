@@ -18,12 +18,6 @@ protocol RenderIndicator: UIView {
 /// Base cell class used for rendering chunk (with any images) of long image
 public class RenderCell: UICollectionViewCell {
     
-    /// Data source for fill images
-    public struct ImagesDataSource {
-        let images: [UIImage]   // images for fill cell
-        let imageSize: CGSize?  // size for each image (maybe nil, than image size calculated inside cell)
-    }
-    
     // MARK: EmptyStyle - style for bacground before rendered images will be loaded
     enum EmptyStyle {
         case empty
@@ -41,7 +35,7 @@ public class RenderCell: UICollectionViewCell {
     }
     
     // MARK: Protected
-    var imagesDataSource: ImagesDataSource?
+    var imagesDataSource: RenderCellData.ImagesSource?
     
     // MARK: Private properties
     private var colorBackgroundView: UIView?
@@ -70,7 +64,7 @@ public class RenderCell: UICollectionViewCell {
     
     /// Update render content
     /// - Note: Override on subclasses
-    func updateImages(_ imagesDataSource: ImagesDataSource?) {
+    func updateImages(_ imagesDataSource: RenderCellData.ImagesSource?) {
         self.imagesDataSource = imagesDataSource
     }
     
