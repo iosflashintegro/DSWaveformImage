@@ -39,11 +39,15 @@ public class WaveformSamplesCollectionProvider: RenderAsyncCollectionProvider {
     
     private var url: URL?
     private var waveformConfiguration: Waveform.Configuration
+    private var isSyncAnalyze: Bool // call analyze operation sync or async
     
     private var samples: [[Float]]?
     
-    public override init(qos: QualityOfService = .userInitiated, queueType: QueueType) {
+    public init(qos: QualityOfService = .userInitiated,
+                queueType: QueueType,
+                isSyncAnalyze: Bool) {
         waveformConfiguration = Waveform.Configuration()
+        self.isSyncAnalyze = isSyncAnalyze
         super.init(qos: qos, queueType: queueType)
     }
     
@@ -56,17 +60,35 @@ public class WaveformSamplesCollectionProvider: RenderAsyncCollectionProvider {
                                completionHandler: ((_ updatedChunkIndexes: [Int]?) -> Void)?) {
         self.collectionConfiguration = collectionConfiguration
         self.waveformConfiguration = waveformConfiguration
-        let anAnalyzerOperation = WaveformSamplesAnalyzeChunkOperation(sourceSamples: amplitudes,
-                                                                       newSamplesCount: newSamplesCount,
-                                                                       duration: duration,
-                                                                       collectionConfiguration: collectionConfiguration) { amplitudes, updatedChunkIndexes, _ in
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self, let amplitudes = amplitudes else { return }
+        
+        if isSyncAnalyze {
+            // в случае синхронного вызова операцию анализа запускаем синхронно (она довольно быстрая)
+            // для того, чтобы сэкономить время на переход между потоками
+
+            clearAllOperations()
+            let anAnalyzerOperation = WaveformSamplesAnalyzeChunkOperation(sourceSamples: amplitudes,
+                                                                           newSamplesCount: newSamplesCount,
+                                                                           duration: duration,
+                                                                           collectionConfiguration: collectionConfiguration) { amplitudes, updatedChunkIndexes, _ in
+                guard let amplitudes = amplitudes else { return }
                 self.samples = amplitudes
                 completionHandler?(updatedChunkIndexes)
             }
+            setupAnalyzerOperation(anAnalyzerOperation)
+            anAnalyzerOperation.start()
+        } else {
+            let anAnalyzerOperation = WaveformSamplesAnalyzeChunkOperation(sourceSamples: amplitudes,
+                                                                           newSamplesCount: newSamplesCount,
+                                                                           duration: duration,
+                                                                           collectionConfiguration: collectionConfiguration) { amplitudes, updatedChunkIndexes, _ in
+                DispatchQueue.main.async { [weak self] in
+                    guard let self = self, let amplitudes = amplitudes else { return }
+                    self.samples = amplitudes
+                    completionHandler?(updatedChunkIndexes)
+                }
+            }
+            prepareAnalyzerOperation(anAnalyzerOperation)
         }
-        prepareAnalyzerOperation(anAnalyzerOperation)
     }
     
     /// Create render operation

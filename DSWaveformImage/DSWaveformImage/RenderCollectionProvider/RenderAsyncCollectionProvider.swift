@@ -196,6 +196,20 @@ public class RenderAsyncCollectionProvider: RenderCollectionProvider {
     }
     
     // MARK: Public methods
+    
+    /// Clear as analyzer as render operations
+    /// - Note: Use for sync call of analyze operation
+    func clearAllOperations() {
+        // invalidate previously calculated analyzed data before execute new analyze operation
+        invalidateAnalyzeData()
+        // cancel all exist operations
+        cancelAllRendering()
+    }
+    
+    /// Only assign analyzer operation
+    func setupAnalyzerOperation(_ anAnalyzerOperation: Operation) {
+        analyzerOperation = anAnalyzerOperation
+    }
 
     /// Any actions on recreate analyserOperation
     func prepareAnalyzerOperation(_ anAnalyzerOperation: Operation) {

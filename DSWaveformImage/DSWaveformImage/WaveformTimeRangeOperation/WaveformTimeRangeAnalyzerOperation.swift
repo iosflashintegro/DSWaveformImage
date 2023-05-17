@@ -14,11 +14,10 @@ public protocol WaveformTimeRangeAnalyzerOutputPass {
     var samplesTimeRanges: [RenderCollection.SamplesTimeRange]? { get }
 }
 
-/// Calculates time ranges from URL.
+/// Calculates time ranges for RenderCollection.CollectionConfiguration
 class WaveformTimeRangeAnalyzerOperation: Operation {
     
     // MARK: Private properties
-    private var url: URL
     private var timeRange: CMTimeRange
     private var collectionConfiguration: RenderCollection.CollectionConfiguration
     private var completionHandler: ((_ ranges: [RenderCollection.SamplesTimeRange]?) -> Void)?
@@ -31,11 +30,9 @@ class WaveformTimeRangeAnalyzerOperation: Operation {
     /// - Parameter timeRange: track interval
     /// - Parameter collectionConfiguration: totalWidth & itemWidth for rendering previews.
     /// - Parameter completionHandler: called from a background thread. Returns array of timestampRange for each range.
-    init(url: URL,
-         timeRange: CMTimeRange,
+    init(timeRange: CMTimeRange,
          collectionConfiguration: RenderCollection.CollectionConfiguration,
          completionHandler: ((_ ranges: [RenderCollection.SamplesTimeRange]?) -> Void)?) {
-        self.url = url
         self.timeRange = timeRange
         self.collectionConfiguration = collectionConfiguration
         self.completionHandler = completionHandler

@@ -36,15 +36,30 @@ public class WaveformTimeRangeCollectionProvider: RenderAsyncCollectionProvider 
         }
     }
     
+    // MARK: State
+    
+    // состояние, откуда необходимо рендерить данные
+    enum RenderState {
+        case url    // загрузка данных из файла
+        case cache  // загрузка данных из кешированных сэмплов
+    }
+    
+    
     // MARK: Instance
+    
+    private var renderState: RenderState = .url
 
     private var url: URL?
     private var waveformConfiguration: Waveform.Configuration
     
-    private var samplesTimeRanges: [RenderCollection.SamplesTimeRange]? // параметры интервалов для каждой из ячеек
+    private var samplesContainer: SamplesContainer?
+
+    private var cacheCollectionProvider: WaveformSamplesCollectionProvider
+    
     
     public override init(qos: QualityOfService = .userInitiated, queueType: QueueType) {
         waveformConfiguration = Waveform.Configuration()
+        cacheCollectionProvider = WaveformSamplesCollectionProvider(qos: qos, queueType: queueType, isSyncAnalyze: true)
         super.init(qos: qos, queueType: queueType)
     }
     
@@ -53,27 +68,135 @@ public class WaveformTimeRangeCollectionProvider: RenderAsyncCollectionProvider 
                                timeRange: CMTimeRange,
                                collectionConfiguration: RenderCollection.CollectionConfiguration,
                                waveformConfiguration: Waveform.Configuration) {
+        self.renderState = .url
+        
         self.url = url
         self.waveformConfiguration = waveformConfiguration
         self.collectionConfiguration = collectionConfiguration
 
-        let anAnalyzerOperation = WaveformTimeRangeAnalyzerOperation(url: url,
-                                                                     timeRange: timeRange,
+        let anAnalyzerOperation = WaveformTimeRangeAnalyzerOperation(timeRange: timeRange,
                                                                      collectionConfiguration: collectionConfiguration) { ranges in
             DispatchQueue.main.async { [weak self] in
                 guard let self = self, let ranges = ranges else { return }
-                self.samplesTimeRanges = ranges
+                self.samplesContainer = SamplesContainer(fullTimeRange: timeRange,
+                                                         samplesTimeRanges: ranges)
             }
         }
         prepareAnalyzerOperation(anAnalyzerOperation)
     }
     
+    /// Recreate eixst anaylized samples with new collectionConfiguration
+    /// - Returns:
+    ///     - true: if all samples already loading
+    ///     - false: in antother cases
+    public func prepareExistSamples(timeRange: CMTimeRange,
+                                    collectionConfiguration: RenderCollection.CollectionConfiguration,
+                                    waveformConfiguration: Waveform.Configuration) -> Bool {
+        guard let samplesContainer = samplesContainer else { return false }
+        if samplesContainer.fullTimeRange != timeRange { return false }
+        let linearSamples = samplesContainer.linearSamples
+        if linearSamples.count == 0 { return false }
+        
+        self.renderState = .cache
+        
+        self.collectionConfiguration = collectionConfiguration
+        self.waveformConfiguration = waveformConfiguration
+        
+        // изменим (если нужно) кол-во сэмплов под заданные отображаемые размеры
+        let targetSamplesCount = Int(collectionConfiguration.collectionWidth * waveformConfiguration.scale)
+        let targetSamples = Resampler.resample(array: linearSamples, toSize: targetSamplesCount)
+
+        cacheCollectionProvider.prepareSamples(amplitudes: targetSamples,
+                                               newSamplesCount: targetSamples.count,
+                                               duration: timeRange.duration,
+                                               collectionConfiguration: collectionConfiguration,
+                                               waveformConfiguration: waveformConfiguration) { _ in
+        }
+        
+        return true
+    }
+    
+    
+    /// Get image for target index
+    public override func getImages(for index: Int,
+                                   size: CGSize,
+                                   completionHandler: ((_ imagesDataSource: RenderCellData.ImagesSource?, _ index: Int) -> Void)?) {
+        switch renderState {
+
+        case .url:
+            super.getImages(for: index,
+                            size: size) { imagesDataSource, index in
+                guard let imagesSamplesDataSource = imagesDataSource as? RenderCellData.ImagesSamplesSource else {
+                    completionHandler?(imagesDataSource, index)
+                    return
+                }
+
+                // также сохраним данные сэмплов
+                self.samplesContainer?.setupSamples(imagesSamplesDataSource.samples, index: index)
+                completionHandler?(imagesDataSource, index)
+            }
+
+        case .cache:
+            // при получении данных при рендеринге кешированных данных дополнительно обновлять ничего не нужно
+            cacheCollectionProvider.getImages(for: index,
+                                              size: size,
+                                              completionHandler: completionHandler)
+        }
+    }
+        
     /// Create render operation
     override func createRenderOperation(for index: Int,
                                         renderData: Any?,
                                         size: CGSize,
                                         loadDataDispatchQueue: DispatchQueue,
                                         completion: ((RenderCellData.ImagesSource?) -> Void)?) -> Operation? {
+        switch renderState {
+        case .url:
+            return createUrlRenderOperation(for: index,
+                                            renderData: renderData,
+                                            size: size,
+                                            loadDataDispatchQueue: loadDataDispatchQueue,
+                                            completion: completion)
+        case .cache:
+            return cacheCollectionProvider.createRenderOperation(for: index,
+                                                                 renderData: renderData,
+                                                                 size: size,
+                                                                 loadDataDispatchQueue: loadDataDispatchQueue,
+                                                                 completion: completion)
+        }
+    }
+    
+    /// Invalidate already calculated after finish analyzerOperation data
+    override func invalidateAnalyzeData() {
+        samplesContainer = nil
+    }
+    
+    /// Check if analyzed data already exist
+    override func isAnalyzeDataExist() -> Bool {
+        return (samplesContainer != nil)
+    }
+    
+    /// Get already calculated analyzed data
+    override func getExistAnalyzeData(index: Int) -> Any? {
+        return samplesContainer?.samplesTimeRanges[safeIndex: index]
+    }
+    
+    /// Get analyzed data from finished operation
+    override func getAnalyzeData(operation: Operation, index: Int) -> Any? {
+        return (operation as? WaveformTimeRangeAnalyzerOperation)?.samplesTimeRanges?[safeIndex: index]
+    }
+
+}
+
+
+// MARK: Private methods
+extension WaveformTimeRangeCollectionProvider {
+ 
+    private func createUrlRenderOperation(for index: Int,
+                                          renderData: Any?,
+                                          size: CGSize,
+                                          loadDataDispatchQueue: DispatchQueue,
+                                          completion: ((RenderCellData.ImagesSource?) -> Void)?) -> Operation? {
         guard let url = url else { return nil }
         var samplesTimeRange: RenderCollection.SamplesTimeRange?
         if let aRenderData = renderData {
@@ -97,25 +220,4 @@ public class WaveformTimeRangeCollectionProvider: RenderAsyncCollectionProvider 
                                                                     completionHandler: completion)
         return renderOperation
     }
-    
-    /// Invalidate already calculated after finish analyzerOperation data
-    override func invalidateAnalyzeData() {
-        samplesTimeRanges = nil
-    }
-    
-    /// Check if analyzed data already exist
-    override func isAnalyzeDataExist() -> Bool {
-        return (samplesTimeRanges != nil)
-    }
-    
-    /// Get already calculated analyzed data
-    override func getExistAnalyzeData(index: Int) -> Any? {
-        return samplesTimeRanges?[safeIndex: index]
-    }
-    
-    /// Get analyzed data from finished operation
-    override func getAnalyzeData(operation: Operation, index: Int) -> Any? {
-        return (operation as? WaveformTimeRangeAnalyzerOperation)?.samplesTimeRanges?[safeIndex: index]
-    }
-
 }

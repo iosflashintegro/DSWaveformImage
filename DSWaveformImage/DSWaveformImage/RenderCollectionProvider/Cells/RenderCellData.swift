@@ -21,4 +21,20 @@ public enum RenderCellData {
             self.imageSize = imageSize
         }
     }
+    
+    /// Data source with samples for rendering Waveform
+    /// - Note:
+    ///     - used only for RenderSingleImageCell
+    ///     - used only first image in images
+    public class ImagesSamplesSource: ImagesSource {
+        let samples: [Float]    // samples for rendering in cell
+        
+        init(images: [UIImage],
+             samples: [Float],
+             imageSize: CGSize?) {
+            self.samples = samples
+            super.init(images: images,
+                       imageSize: imageSize)
+        }
+    }
 }

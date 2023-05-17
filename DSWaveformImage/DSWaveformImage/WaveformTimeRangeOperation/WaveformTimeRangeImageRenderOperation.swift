@@ -91,11 +91,12 @@ class WaveformTimeRangeImageRenderOperation: AsyncOperation, RenderOperation {
         self.audioAssetTrack = assetTrack
         
         renderImages(url: url,
-                     samplesRange: range) { [weak self] images in
+                     samplesRange: range) { [weak self] images, samples in
             guard let self = self else { return }
-            if let images = images {
-                self.outputImagesDataSource = RenderCellData.ImagesSource(images: images,
-                                                                          imageSize: nil)
+            if let images = images, let samples = samples {
+                self.outputImagesDataSource = RenderCellData.ImagesSamplesSource(images: images,
+                                                                                 samples: samples,
+                                                                                 imageSize: nil)
             } else {
                 self.outputImagesDataSource = nil
             }
@@ -114,7 +115,7 @@ class WaveformTimeRangeImageRenderOperation: AsyncOperation, RenderOperation {
     
     private func renderImages(url: URL,
                               samplesRange: RenderCollection.SamplesTimeRange,
-                              renderCompletion: @escaping (_ images: [UIImage]?) -> Void) {
+                              renderCompletion: @escaping (_ images: [UIImage]?, _ samples: [Float]?) -> Void) {
         let samplesCount = samplesRange.samplesCount
         let timeRange = samplesRange.range
         assetReader?.timeRange = timeRange
@@ -124,15 +125,15 @@ class WaveformTimeRangeImageRenderOperation: AsyncOperation, RenderOperation {
                         fftBands: nil) { [weak self] analysis in
             guard let self = self,
                   let analysis = analysis else {
-                renderCompletion(nil)
+                renderCompletion(nil, nil)
                 return
             }
             let samples = analysis.amplitudes
 
             if let image = self.render(samples: samples, with: self.waveformConfiguration) {
-                renderCompletion([image])
+                renderCompletion([image], samples)
             } else {
-                renderCompletion(nil)
+                renderCompletion(nil, nil)
             }
         }
     }
