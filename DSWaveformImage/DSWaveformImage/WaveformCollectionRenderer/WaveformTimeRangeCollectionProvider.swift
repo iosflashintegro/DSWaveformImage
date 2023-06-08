@@ -63,6 +63,10 @@ public class WaveformTimeRangeCollectionProvider: RenderAsyncCollectionProvider 
         super.init(qos: qos, queueType: queueType)
     }
     
+    public func prepare(collectionConfiguration: RenderCollection.CollectionConfiguration) {
+        self.collectionConfiguration = collectionConfiguration
+    }
+    
     /// Analyze audio from url & load all samples
     public func prepareSamples(url: URL,
                                timeRange: CMTimeRange,
