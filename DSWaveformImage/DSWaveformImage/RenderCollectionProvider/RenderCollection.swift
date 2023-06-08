@@ -14,9 +14,11 @@ public enum RenderCollection {
     
     /// Configuration for RenderCollectionProvider
     public struct CollectionConfiguration {
-        public let visibleAreaWidth: CGFloat    // width of visible area of timelene
-        public let collectionWidth: CGFloat
-        public let collectionHeight: CGFloat
+        public let visibleAreaWidth: CGFloat    // width of visible area of timeline
+        public let totalWidth: CGFloat          // total with of full track (not only visible part - track can be trimmed)
+        public let visibleWidth: CGFloat        // visible part of track (cell's width - width of track without trimmed parts)
+        public let startTrimOffset: CGFloat     // offset between pseudo startPosition of track if it isn't trimmed on start and real startPoint
+        public let collectionHeight: CGFloat    // height of cell
         public let itemWidth: CGFloat           // the width of the element into which the entire width will be split
         public let itemsWidth: [CGFloat]        // the width of all the elements into which we divide collectionWidth
         
@@ -30,24 +32,32 @@ public enum RenderCollection {
         }
 
         
-        public init(visibleAreaWidth: CGFloat = 0,
-                    collectionWidth: CGFloat = 0,
-                    collectionHeight: CGFloat = 0,
+        public init(visibleAreaWidth: CGFloat,
+                    totalWidth: CGFloat,
+                    startTrimOffset: CGFloat,
+                    visibleWidth: CGFloat,
+                    collectionHeight: CGFloat,
                     itemWidth: CGFloat) {
             self.visibleAreaWidth = visibleAreaWidth
-            self.collectionWidth = collectionWidth
+            self.totalWidth = totalWidth
+            self.startTrimOffset = startTrimOffset
+            self.visibleWidth = visibleWidth
             self.collectionHeight = collectionHeight
             self.itemWidth = itemWidth
-            self.itemsWidth = WaveformSupport.devideSegment(segmentWidth: collectionWidth,
+            self.itemsWidth = WaveformSupport.devideSegment(segmentWidth: totalWidth,
                                                             itemWidth: itemWidth)
         }
         
         public func with(visibleAreaWidth: CGFloat? = nil,
-                         collectionWidth: CGFloat? = nil,
+                         totalWidth: CGFloat? = nil,
+                         startTrimOffset: CGFloat? = nil,
+                         visibleWidth: CGFloat? = nil,
                          collectionHeight: CGFloat? = nil,
                          itemWidth: CGFloat? = nil) -> CollectionConfiguration {
             return CollectionConfiguration(visibleAreaWidth: visibleAreaWidth ?? self.visibleAreaWidth,
-                                           collectionWidth: collectionWidth ?? self.collectionWidth,
+                                           totalWidth: totalWidth ?? self.totalWidth,
+                                           startTrimOffset: startTrimOffset ?? self.startTrimOffset,
+                                           visibleWidth: visibleWidth ?? self.visibleWidth,
                                            collectionHeight: collectionHeight ?? self.collectionHeight,
                                            itemWidth: itemWidth ?? self.itemWidth)
         }
@@ -65,7 +75,7 @@ public enum RenderCollection {
     static func createSamplesRanges(timeRange: CMTimeRange,
                                     collectionConfiguration: CollectionConfiguration) -> [SamplesTimeRange]? {
         // proportions for each collectionWidth
-        let proportionallyParts = collectionConfiguration.itemsWidth.map { Double($0 / collectionConfiguration.collectionWidth) }
+        let proportionallyParts = collectionConfiguration.itemsWidth.map { Double($0 / collectionConfiguration.totalWidth) }
         let chunkTimeRanges = timeRange.split(proportionallyParts: proportionallyParts)
         
         if chunkTimeRanges.count != collectionConfiguration.itemsWidth.count {

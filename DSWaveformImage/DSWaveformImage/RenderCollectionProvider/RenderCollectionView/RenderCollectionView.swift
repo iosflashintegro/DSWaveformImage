@@ -23,7 +23,9 @@ class RenderCollectionView: UIView {
     var flowLayout = UICollectionViewFlowLayout()
     var collectionView: UICollectionView!
     var collectionConfiguration = RenderCollection.CollectionConfiguration(visibleAreaWidth: 0,
-                                                                           collectionWidth: 0,
+                                                                           totalWidth: 0,
+                                                                           startTrimOffset: 0,
+                                                                           visibleWidth: 0,
                                                                            collectionHeight: 0,
                                                                            itemWidth: 0)
     var renderType: ImageRenderType = .single
@@ -156,32 +158,32 @@ class RenderCollectionView: UIView {
     
     /// Update size and contentOffset inside collectionView for current value of view's contentOffset
     private func updateCollectionViewContentOffset() {
-        let itemWidth = collectionConfiguration.itemWidth
-        let totalWidth = collectionConfiguration.collectionWidth
-        if isChunkGenerationEnable && itemWidth < totalWidth {
-            // смещение origin отображаемого "окна" collectionView
-            // (здесь не приравниваем collectionViewContentOffset = contentOffset, т.к. contentOffset.y может быть не 0 )
-            var collectionViewContentOffset = CGPoint(x: contentOffset.x, y: 0)
-
-            // основно размер "окна" - ширина видимой области таймлайна
+        let startTrimOffset = collectionConfiguration.startTrimOffset
+        
+        if isChunkGenerationEnable {
+            // основной размер "окна" - ширина видимой области таймлайна
             let windowWidth = collectionConfiguration.visibleAreaWidth
-            let leftEcxess = windowWidth/2
+            let leftExcess = windowWidth/2
             let rightExcess = windowWidth/2
 
-            // увеличиваем размер "окна" на leftEcxess и rightExcess, а также смещаем orgin "окна" влево на leftEcxess
-            collectionViewContentOffset = CGPoint(x: collectionViewContentOffset.x - leftEcxess, y: collectionViewContentOffset.y)
-            let collectionViewFrame = CGRect(origin: collectionViewContentOffset,
-                                             size: CGSize(width: windowWidth + leftEcxess + rightExcess, height: bounds.size.height))
+            let collectionViewFrame = CGRect(origin: CGPoint(x: contentOffset.x - leftExcess,
+                                                             y: 0),
+                                             size: CGSize(width: windowWidth + leftExcess + rightExcess,
+                                                          height: bounds.size.height))
+
             collectionView.frame = collectionViewFrame
-            // важно! устанавливаем смещение через collectionView.contentOffset(_:, animated:), т.к. если установить через collectionView.contenteOffset =,
+            // важно! устанавливаем смещение через collectionView.contentOffset(_:, animated:), т.к. если установить через collectionView.contentOffset =,
             // то на ios 16.2 смещение будет анимировано
-            collectionView.setContentOffset(collectionViewContentOffset, animated: false)
+            
+            let targetContentOffset = CGPoint(x: contentOffset.x - leftExcess + startTrimOffset, y: 0)
+            collectionView.setContentOffset(targetContentOffset, animated: false)
         } else {
             collectionView.frame = CGRect(origin: CGPoint(x: 0, y: 0),
                                       size: bounds.size)
         }
-        self.layoutIfNeeded()
+        
         self.setNeedsLayout()
+        self.layoutIfNeeded()
     }
     
     /// Return cell's identificator for cell type

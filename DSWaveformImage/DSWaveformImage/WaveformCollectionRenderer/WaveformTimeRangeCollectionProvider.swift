@@ -103,7 +103,7 @@ public class WaveformTimeRangeCollectionProvider: RenderAsyncCollectionProvider 
         self.waveformConfiguration = waveformConfiguration
         
         // изменим (если нужно) кол-во сэмплов под заданные отображаемые размеры
-        let targetSamplesCount = Int(collectionConfiguration.collectionWidth * waveformConfiguration.scale)
+        let targetSamplesCount = Int(collectionConfiguration.visibleWidth * waveformConfiguration.scale)
         let targetSamples = Resampler.resample(array: linearSamples, toSize: targetSamplesCount)
 
         cacheCollectionProvider.prepareSamples(amplitudes: targetSamples,

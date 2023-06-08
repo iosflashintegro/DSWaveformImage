@@ -19,7 +19,9 @@ public class RenderCollectionProvider {
     
     public init() {
         collectionConfiguration = RenderCollection.CollectionConfiguration(visibleAreaWidth: 0,
-                                                                           collectionWidth: 0,
+                                                                           totalWidth: 0,
+                                                                           startTrimOffset: 0,
+                                                                           visibleWidth: 0,
                                                                            collectionHeight: 0,
                                                                            itemWidth: 0)
     }
