@@ -11,16 +11,6 @@ import UIKit
 /// Cell class used for rendering multi images on cell
 final class RenderMultiImagesCell: RenderCell {
     
-    // MARK: Const
-    enum Const {
-        enum Preview {
-            static let imageCornerRadius: CGFloat = 0
-            static let distanceBetwenImages: CGFloat = 0
-            static let edgeDistance: CGFloat = 0
-            static let blockMargin: CGFloat = 0
-        }
-    }
-    
     // MARK: Private properties
     private var imageViews = [UIImageView]()
     
@@ -64,48 +54,33 @@ final class RenderMultiImagesCell: RenderCell {
     private func drawImages() {
         guard let images = imagesDataSource?.images else { return }
 
-        let imageWidth: CGFloat // ширина каждой картинки
-        if let imageSize = imagesDataSource?.imageSize {
+        let imageSize: CGSize
+        if let anImageSize = imagesDataSource?.imageSize {
             // if the dimensions of the image are set externally, set this value
-            imageWidth = imageSize.width
+            imageSize = anImageSize
         } else {
             // if the images' dimensions are not set, all images will have equal width
             let imageCount = images.count
-            imageWidth = (bounds.size.width - 2 * Const.Preview.edgeDistance - Const.Preview.distanceBetwenImages * CGFloat(imageCount - 1)) / CGFloat(imageCount)
+            let imageWidth = bounds.size.width / CGFloat(imageCount)
+            let imageHeight = bounds.size.height
+            imageSize = CGSize(width: imageWidth, height: imageHeight)
         }
-        
+
+        var imageOrigin: CGPoint = .zero
         for (index, image) in images.enumerated() {
-            let item = UIImageView()
+            imageOrigin = CGPoint(x: (imageSize.width * CGFloat(index)),
+                                  y: 0)
+            let imageFrame = CGRect(origin: imageOrigin,
+                                    size: imageSize)
+            let item = UIImageView(frame: imageFrame)
             item.contentMode = .scaleAspectFill
             item.image = image
-            item.translatesAutoresizingMaskIntoConstraints = false
-            item.layer.cornerRadius = Const.Preview.imageCornerRadius
             item.clipsToBounds = true
             imageViews.append(item)
             contentView.insertSubview(item, at: 0)
-
-            if index == 0 && images.count == 1 {
-                item.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Const.Preview.blockMargin).isActive = true
-                item.widthAnchor.constraint(equalToConstant: imageWidth).isActive = true
-                item.layer.maskedCorners = [.layerMaxXMinYCorner, .layerMaxXMaxYCorner]
-            } else if index == 0 {
-                item.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Const.Preview.blockMargin).isActive = true
-                item.widthAnchor.constraint(equalToConstant: imageWidth).isActive = true
-                item.layer.maskedCorners = [.layerMinXMinYCorner, .layerMinXMaxYCorner]
-            } else if index == images.count - 1 {
-                item.leadingAnchor.constraint(equalTo: imageViews[index - 1].trailingAnchor, constant: Const.Preview.distanceBetwenImages).isActive = true
-                item.widthAnchor.constraint(equalToConstant: imageWidth).isActive = true
-                item.layer.maskedCorners = [.layerMaxXMinYCorner, .layerMaxXMaxYCorner]
-            } else {
-                item.leadingAnchor.constraint(equalTo: imageViews[index - 1].trailingAnchor, constant: Const.Preview.distanceBetwenImages).isActive = true
-                item.widthAnchor.constraint(equalToConstant: imageWidth).isActive = true
-             }
-
-            item.topAnchor.constraint(equalTo: topAnchor).isActive = true
-            item.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
         }
     }
-    
+
     private func removeAllImages() {
         imageViews.forEach({ $0.removeFromSuperview() })
         imageViews.removeAll()
