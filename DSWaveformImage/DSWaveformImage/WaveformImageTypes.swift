@@ -117,7 +117,7 @@ public enum Waveform {
         public let scale: CGFloat
 
         /// *Optional* padding or vertical shrinking factor for the waveform.
-        @available(swift, obsoleted: 3.0, message: "Please use scalingFactor instead")
+        @available(*, deprecated, renamed: "verticalScalingFactor")
         public let paddingFactor: CGFloat? = nil
 
         /**
