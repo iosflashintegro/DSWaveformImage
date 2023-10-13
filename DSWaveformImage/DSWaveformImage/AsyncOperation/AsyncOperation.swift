@@ -48,11 +48,7 @@ extension AsyncOperation {
         main()
         state = .executing
     }
-    
-    override open func cancel() {
-        super.cancel()
-    }
-    
+   
     public func markAsFinished() {
         state = .finished
     }

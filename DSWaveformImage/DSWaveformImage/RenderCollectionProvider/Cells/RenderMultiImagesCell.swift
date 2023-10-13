@@ -24,16 +24,6 @@ final class RenderMultiImagesCell: RenderCell {
         setupUI()
     }
     
-    // MARK: Setup UI
-    override func setupUI() {
-        super.setupUI()
-    }
-    
-    // MARK: Layout
-    override func layoutSubviews() {
-        super.layoutSubviews()
-    }
-    
     // MARK: Override methods
     
     /// Clear content images
