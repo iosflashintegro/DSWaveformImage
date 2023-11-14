@@ -3,7 +3,7 @@
 //  vqVideoeditor
 //
 //  Created by Dmitry Nuzhin on 28.01.2022.
-//  Copyright © 2022 Stas Klem. All rights reserved.
+//  Copyright © 2022 FlashIntegro. All rights reserved.
 //
 
 import Foundation

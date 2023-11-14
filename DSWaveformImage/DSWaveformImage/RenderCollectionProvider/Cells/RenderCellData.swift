@@ -3,7 +3,7 @@
 //  VSDCTests
 //
 //  Created by Dmitry Nuzhin on 17.05.2023.
-//  Copyright © 2023 Stas Klem. All rights reserved.
+//  Copyright © 2023 FlashIntegro. All rights reserved.
 //
 
 import UIKit
