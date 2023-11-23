@@ -2,6 +2,7 @@ import Foundation
 import AVFoundation
 import UIKit
 import CoreGraphics
+import vsdcCommonServices
 
 /// Renders a UIImage of the waveform data calculated by the analyzer.
 public class WaveformImageDrawer {
