@@ -10,10 +10,10 @@ import Foundation
 import UIKit
 
 /// Base provider class for rendering any object devided into chunks.
-public class RenderCollectionProvider {
+open class RenderCollectionProvider {
 
     // MARK: Protected properties
-    var collectionConfiguration: RenderCollection.CollectionConfiguration
+    open var collectionConfiguration: RenderCollection.CollectionConfiguration
     
     // MARK: Constructor/Destructor/Init
     
@@ -30,13 +30,13 @@ public class RenderCollectionProvider {
     
     /// Get image for target index
     /// - Note: Override on subclasses
-    public func getImages(for index: Int,
-                          size: CGSize,
-                          completionHandler: ((_ imagesDataSource: RenderCellData.ImagesSource?, _ index: Int) -> Void)?) {
+    open func getImages(for index: Int,
+                        size: CGSize,
+                        completionHandler: ((_ imagesDataSource: RenderCellData.ImagesSource?, _ index: Int) -> Void)?) {
     }
     
     /// Cancel image generation at index
     /// - Note: Override on subclasses
-    public func cancelRendering(index: Int) {
+    open func cancelRendering(index: Int) {
     }
 }

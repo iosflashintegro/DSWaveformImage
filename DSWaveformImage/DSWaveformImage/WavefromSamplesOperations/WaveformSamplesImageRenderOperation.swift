@@ -245,7 +245,7 @@ private extension WaveformSamplesImageRenderOperation {
 // MARK: - ImageRenderOutputPass
 
 extension WaveformSamplesImageRenderOperation: ImageRenderOutputPass {
-    var imagesDataSource: RenderCellData.ImagesSource? {
+    public var imagesDataSource: RenderCellData.ImagesSource? {
         return outputImagesDataSource
     }
 }

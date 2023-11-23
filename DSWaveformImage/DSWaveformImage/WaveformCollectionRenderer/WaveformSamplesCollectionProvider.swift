@@ -11,12 +11,12 @@ import UIKit
 import AVKit
 
 /// Provider for waveform created from samples
-public class WaveformSamplesCollectionProvider: RenderAsyncCollectionProvider {
+open class WaveformSamplesCollectionProvider: RenderAsyncCollectionProvider {
     
     // MARK: Static
     
     private static var _sharedQueue: OperationQueue?
-    override class var sharedQueue: OperationQueue? {
+    open override class var sharedQueue: OperationQueue? {
         get {
             return _sharedQueue
         }
@@ -26,7 +26,7 @@ public class WaveformSamplesCollectionProvider: RenderAsyncCollectionProvider {
     }
     
     private static var _sharedFullLoadDataQueue: DispatchQueue?
-    override class var sharedFullLoadDataQueue: DispatchQueue? {
+    open override class var sharedFullLoadDataQueue: DispatchQueue? {
         get {
             return _sharedFullLoadDataQueue
         }
@@ -92,11 +92,11 @@ public class WaveformSamplesCollectionProvider: RenderAsyncCollectionProvider {
     }
     
     /// Create render operation
-    override func createRenderOperation(for index: Int,
-                                        renderData: Any?,
-                                        size: CGSize,
-                                        loadDataDispatchQueue: DispatchQueue,
-                                        completion: ((RenderCellData.ImagesSource?) -> Void)?) -> Operation? {
+    open override func createRenderOperation(for index: Int,
+                                             renderData: Any?,
+                                             size: CGSize,
+                                             loadDataDispatchQueue: DispatchQueue,
+                                             completion: ((RenderCellData.ImagesSource?) -> Void)?) -> Operation? {
         var samplesAtIndex: [Float]?
         if let aRenderData = renderData {
             if let aSamplesAtIndex = aRenderData as? [Float] {
@@ -120,22 +120,22 @@ public class WaveformSamplesCollectionProvider: RenderAsyncCollectionProvider {
     }
     
     /// Invalidate already calculated after finish analyzerOperation data
-    override func invalidateAnalyzeData() {
+    open override func invalidateAnalyzeData() {
         samples = nil
     }
     
     /// Check if analyzed data already exist
-    override func isAnalyzeDataExist() -> Bool {
+    open override func isAnalyzeDataExist() -> Bool {
         return (samples != nil)
     }
     
     /// Get already calculated analyzed data
-    override func getExistAnalyzeData(index: Int) -> Any? {
+    open override func getExistAnalyzeData(index: Int) -> Any? {
         return samples?[safeIndex: index]
     }
     
     /// Get analyzed data from finished operation
-    override func getAnalyzeData(operation: Operation, index: Int) -> Any? {
+    open override func getAnalyzeData(operation: Operation, index: Int) -> Any? {
         return (operation as? WaveformSamplesAnalyzerChunkOutputPass)?.chunkAmplitudes?[safeIndex: index]
     }
 }

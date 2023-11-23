@@ -11,7 +11,7 @@ import AVKit
 
 
 /// Хранилище разбиений на интервалы и всех сэмплов
-public class SamplesContainer {
+open class SamplesContainer {
     
     // длительность всего интервала, который разбивается на участки
     private(set) var fullTimeRange: CMTimeRange

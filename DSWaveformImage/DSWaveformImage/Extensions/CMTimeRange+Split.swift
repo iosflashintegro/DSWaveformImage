@@ -12,7 +12,7 @@ import CoreMedia
 extension CMTimeRange {
 
     /// Splitting CMTimeRange for a given number of segments of equal length
-    func splitIntoChunks(count: UInt) -> [CMTimeRange]? {
+    public func splitIntoChunks(count: UInt) -> [CMTimeRange]? {
         if count == 0 { return nil }
         if count == 1 { return [self] }
         
@@ -34,7 +34,7 @@ extension CMTimeRange {
     /// Splitting CMTimeRange into segments of a given length
     /// - Note: At the same time, if length is not a multiple of duration for a given CMTimeRange (which usually happens),
     /// then the last interval will be shorter than the specified length
-    func splitIntoChunks(length: CMTime) -> [CMTimeRange]? {
+    public func splitIntoChunks(length: CMTime) -> [CMTimeRange]? {
         var chunks: [CMTimeRange] = []
         var from = self.start
         while from < self.end {
@@ -45,7 +45,7 @@ extension CMTimeRange {
         return chunks.count > 0 ? chunks : nil
     }
     
-    func split(proportionallyParts: [Double]) -> [CMTimeRange] {
+    public func split(proportionallyParts: [Double]) -> [CMTimeRange] {
         var chunks: [CMTimeRange] = []
         var from = self.start
         for index in 0..<proportionallyParts.count {

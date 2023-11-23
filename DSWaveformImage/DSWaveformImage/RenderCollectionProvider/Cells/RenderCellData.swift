@@ -12,11 +12,11 @@ public enum RenderCellData {
 
     /// Data source for fill images in RenderCell
     public class ImagesSource {
-        let images: [UIImage]   // images for fill cell
-        let imageSize: CGSize?  // size for each image (maybe nil, than image size calculated inside cell)
+        public let images: [UIImage]    // images for fill cell
+        public let imageSize: CGSize?   // size for each image (maybe nil, than image size calculated inside cell)
 
-        init(images: [UIImage],
-             imageSize: CGSize?) {
+        public init(images: [UIImage],
+                    imageSize: CGSize?) {
             self.images = images
             self.imageSize = imageSize
         }
@@ -27,11 +27,11 @@ public enum RenderCellData {
     ///     - used only for RenderSingleImageCell
     ///     - used only first image in images
     public class ImagesSamplesSource: ImagesSource {
-        let samples: [Float]    // samples for rendering in cell
+        public let samples: [Float]     // samples for rendering in cell
         
-        init(images: [UIImage],
-             samples: [Float],
-             imageSize: CGSize?) {
+        public init(images: [UIImage],
+                    samples: [Float],
+                    imageSize: CGSize?) {
             self.samples = samples
             super.init(images: images,
                        imageSize: imageSize)

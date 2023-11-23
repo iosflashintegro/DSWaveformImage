@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 /// Output protocol for RenderOperation
-protocol ImageRenderOutputPass {
+public protocol ImageRenderOutputPass {
     var imagesDataSource: RenderCellData.ImagesSource? { get }
 }
 

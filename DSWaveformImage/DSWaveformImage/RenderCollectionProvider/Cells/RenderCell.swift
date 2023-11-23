@@ -9,17 +9,17 @@
 import UIKit
 
 /// Protocol for render indicator
-protocol RenderIndicator: UIView {
+public protocol RenderIndicator: UIView {
     func startRenderAnimating()
     func stopRenderAnimating()
 }
 
 
 /// Base cell class used for rendering chunk (with any images) of long image
-public class RenderCell: UICollectionViewCell {
+open class RenderCell: UICollectionViewCell {
     
     // MARK: EmptyStyle - style for bacground before rendered images will be loaded
-    enum EmptyStyle {
+    public enum EmptyStyle {
         case empty
         case color(UIColor)
         case blur(UIBlurEffect, CGFloat)

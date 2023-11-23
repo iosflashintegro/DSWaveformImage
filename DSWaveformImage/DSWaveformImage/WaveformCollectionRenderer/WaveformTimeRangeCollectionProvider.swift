@@ -12,12 +12,12 @@ import AVKit
 
 
 /// Provider for waveform created from URL
-public class WaveformTimeRangeCollectionProvider: RenderAsyncCollectionProvider {
+open class WaveformTimeRangeCollectionProvider: RenderAsyncCollectionProvider {
     
     // MARK: Static
     
     private static var _sharedQueue: OperationQueue?
-    override class var sharedQueue: OperationQueue? {
+    open override class var sharedQueue: OperationQueue? {
         get {
             return _sharedQueue
         }
@@ -27,7 +27,7 @@ public class WaveformTimeRangeCollectionProvider: RenderAsyncCollectionProvider 
     }
     
     private static var _sharedFullLoadDataQueue: DispatchQueue?
-    override class var sharedFullLoadDataQueue: DispatchQueue? {
+    open override class var sharedFullLoadDataQueue: DispatchQueue? {
         get {
             return _sharedFullLoadDataQueue
         }
@@ -149,11 +149,11 @@ public class WaveformTimeRangeCollectionProvider: RenderAsyncCollectionProvider 
     }
         
     /// Create render operation
-    override func createRenderOperation(for index: Int,
-                                        renderData: Any?,
-                                        size: CGSize,
-                                        loadDataDispatchQueue: DispatchQueue,
-                                        completion: ((RenderCellData.ImagesSource?) -> Void)?) -> Operation? {
+    open override func createRenderOperation(for index: Int,
+                                             renderData: Any?,
+                                             size: CGSize,
+                                             loadDataDispatchQueue: DispatchQueue,
+                                             completion: ((RenderCellData.ImagesSource?) -> Void)?) -> Operation? {
         switch renderState {
         case .url:
             return createUrlRenderOperation(for: index,
@@ -171,22 +171,22 @@ public class WaveformTimeRangeCollectionProvider: RenderAsyncCollectionProvider 
     }
     
     /// Invalidate already calculated after finish analyzerOperation data
-    override func invalidateAnalyzeData() {
+    open override func invalidateAnalyzeData() {
         samplesContainer = nil
     }
     
     /// Check if analyzed data already exist
-    override func isAnalyzeDataExist() -> Bool {
+    open override func isAnalyzeDataExist() -> Bool {
         return (samplesContainer != nil)
     }
     
     /// Get already calculated analyzed data
-    override func getExistAnalyzeData(index: Int) -> Any? {
+    open override func getExistAnalyzeData(index: Int) -> Any? {
         return samplesContainer?.samplesTimeRanges[safeIndex: index]
     }
     
     /// Get analyzed data from finished operation
-    override func getAnalyzeData(operation: Operation, index: Int) -> Any? {
+    open override func getAnalyzeData(operation: Operation, index: Int) -> Any? {
         return (operation as? WaveformTimeRangeAnalyzerOperation)?.samplesTimeRanges?[safeIndex: index]
     }
 

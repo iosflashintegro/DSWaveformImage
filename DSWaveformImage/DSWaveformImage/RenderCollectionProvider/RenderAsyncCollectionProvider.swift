@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 /// Async version of RenderCollectionProvider
-public class RenderAsyncCollectionProvider: RenderCollectionProvider {
+open class RenderAsyncCollectionProvider: RenderCollectionProvider {
     
     // MARK: Enum
     
@@ -22,7 +22,7 @@ public class RenderAsyncCollectionProvider: RenderCollectionProvider {
     }
     
     /// Source for rendering data
-    enum RenderSource: CustomStringConvertible {
+    public enum RenderSource: CustomStringConvertible {
         
         case activeOperation            // wait active analyze operation
         case finishedOperation(Any)     // get data from already finished analyze operation
@@ -58,7 +58,7 @@ public class RenderAsyncCollectionProvider: RenderCollectionProvider {
             }
         }
         
-        var description: String {
+        public var description: String {
             switch self {
             case .activeOperation:
                 return "activeOperation"
@@ -76,7 +76,7 @@ public class RenderAsyncCollectionProvider: RenderCollectionProvider {
     
     private static var _sharedQueue: OperationQueue?
     // sharedQueue will be overrided on subclasses for has access to private _sharedQueue, uniqued for each subclass
-    class var sharedQueue: OperationQueue? {
+    open class var sharedQueue: OperationQueue? {
         get {
             return _sharedQueue
         }
@@ -86,7 +86,7 @@ public class RenderAsyncCollectionProvider: RenderCollectionProvider {
     }
     
     /// Get sharedQueue
-    class func getSharedFullQueue(qos: QualityOfService = .userInitiated) -> OperationQueue {
+    open class func getSharedFullQueue(qos: QualityOfService = .userInitiated) -> OperationQueue {
         if let queue = sharedQueue {
             return queue
         } else {
@@ -97,7 +97,7 @@ public class RenderAsyncCollectionProvider: RenderCollectionProvider {
     }
     
     /// Creatae queue for rendering, shared between all instance of current class
-    class func createSharedFullQueue(qos: QualityOfService = .userInitiated) -> OperationQueue {
+    open class func createSharedFullQueue(qos: QualityOfService = .userInitiated) -> OperationQueue {
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = 1
         queue.qualityOfService = qos
@@ -113,7 +113,7 @@ public class RenderAsyncCollectionProvider: RenderCollectionProvider {
     
     private static var _sharedFullLoadDataQueue: DispatchQueue?
     // sharedFullLoadDataQueue will be overrided on subclasses for has access to private _sharedFullLoadDataQueue, uniqued for each subclass
-    class var sharedFullLoadDataQueue: DispatchQueue? {
+    open class var sharedFullLoadDataQueue: DispatchQueue? {
         get {
             return _sharedFullLoadDataQueue
         }
@@ -123,7 +123,7 @@ public class RenderAsyncCollectionProvider: RenderCollectionProvider {
     }
     
     /// Get sharedQueue
-    class func getSharedFullLoadDataQueue(qos: DispatchQoS = .userInitiated) -> DispatchQueue {
+    open class func getSharedFullLoadDataQueue(qos: DispatchQoS = .userInitiated) -> DispatchQueue {
         if let queue = sharedFullLoadDataQueue {
             return queue
         } else {
@@ -134,7 +134,7 @@ public class RenderAsyncCollectionProvider: RenderCollectionProvider {
     }
     
     /// Creatae queue for loading data from resource, shared between all instance of current class
-    class func createSharedFullLoadDataQueue(qos: DispatchQoS = .userInitiated) -> DispatchQueue {
+    open class func createSharedFullLoadDataQueue(qos: DispatchQoS = .userInitiated) -> DispatchQueue {
         let className = String(describing: self)
         let queueName = className + "LoadDataQueue_SharedFull_" + UUID().uuidString
         let queue = DispatchQueue(label: queueName, qos: qos)
@@ -144,7 +144,7 @@ public class RenderAsyncCollectionProvider: RenderCollectionProvider {
     // MARK: Static methods
     
     /// Creatae queue for rendering, shared between any instances of current class
-    class func createSharedQueue(qos: QualityOfService = .userInitiated) -> OperationQueue {
+    open class func createSharedQueue(qos: QualityOfService = .userInitiated) -> OperationQueue {
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = 1
         queue.qualityOfService = qos
@@ -157,7 +157,7 @@ public class RenderAsyncCollectionProvider: RenderCollectionProvider {
     }
     
     /// Creatae queue for loading data from resource, shared between any instances of current class
-    class func createSharedLoadDataQueue(qos: DispatchQoS = .userInitiated) -> DispatchQueue {
+    open class func createSharedLoadDataQueue(qos: DispatchQoS = .userInitiated) -> DispatchQueue {
         let className = String(describing: self)
         let queueName = className + "LoadDataQueue_Shared_" + UUID().uuidString
         let queue = DispatchQueue(label: queueName, qos: qos)
@@ -199,7 +199,7 @@ public class RenderAsyncCollectionProvider: RenderCollectionProvider {
     
     /// Clear as analyzer as render operations
     /// - Note: Use for sync call of analyze operation
-    func clearAllOperations() {
+    open func clearAllOperations() {
         // invalidate previously calculated analyzed data before execute new analyze operation
         invalidateAnalyzeData()
         // cancel all exist operations
@@ -207,12 +207,12 @@ public class RenderAsyncCollectionProvider: RenderCollectionProvider {
     }
     
     /// Only assign analyzer operation
-    func setupAnalyzerOperation(_ anAnalyzerOperation: Operation) {
+    open func setupAnalyzerOperation(_ anAnalyzerOperation: Operation) {
         analyzerOperation = anAnalyzerOperation
     }
 
     /// Any actions on recreate analyserOperation
-    func prepareAnalyzerOperation(_ anAnalyzerOperation: Operation) {
+    open func prepareAnalyzerOperation(_ anAnalyzerOperation: Operation) {
         invalidateAnalyzeData()     // invalidate previously calculated analyzed data before execute new analyze operation
         // recreate render operations with new dependency (if needed)
         let udpatedRenderOperations = updateDependendentRenderOperation(anAnalyzerOperation)
@@ -232,9 +232,9 @@ public class RenderAsyncCollectionProvider: RenderCollectionProvider {
     }
     
     /// Get image for target index
-    public override func getImages(for index: Int,
-                                   size: CGSize,
-                                   completionHandler: ((_ imagesDataSource: RenderCellData.ImagesSource?, _ index: Int) -> Void)?) {
+    open override func getImages(for index: Int,
+                                  size: CGSize,
+                                  completionHandler: ((_ imagesDataSource: RenderCellData.ImagesSource?, _ index: Int) -> Void)?) {
         let completion: (RenderCellData.ImagesSource?) -> Void = { imagesDataSource in
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else {
@@ -295,7 +295,7 @@ public class RenderAsyncCollectionProvider: RenderCollectionProvider {
     }
     
     /// Cancel image generation at index
-    public override func cancelRendering(index: Int) {
+    open override func cancelRendering(index: Int) {
         if let operation = renderOperations[index] {
             operation.cancel()
             renderOperations[index] = nil
@@ -303,47 +303,47 @@ public class RenderAsyncCollectionProvider: RenderCollectionProvider {
     }
    
     /// Cancel all operations
-    public func cancelAllRendering() {
+    open func cancelAllRendering() {
         renderOperations.values.forEach { $0.cancel() }
         renderOperations.removeAll()
         analyzerOperation?.cancel()
         analyzerOperation = nil
     }
     
-    public func activeOperationsCount() -> Int {
+    open func activeOperationsCount() -> Int {
         return renderOperations.count + ((analyzerOperation != nil) ? 1: 0)
     }
     
     /// Create render operation
     /// - Note: Override on subclasses
-    func createRenderOperation(for index: Int,
-                               renderData: Any?,
-                               size: CGSize,
-                               loadDataDispatchQueue: DispatchQueue,
-                               completion: ((RenderCellData.ImagesSource?) -> Void)?) -> Operation? {
+    open func createRenderOperation(for index: Int,
+                                    renderData: Any?,
+                                    size: CGSize,
+                                    loadDataDispatchQueue: DispatchQueue,
+                                    completion: ((RenderCellData.ImagesSource?) -> Void)?) -> Operation? {
         return nil
     }
 
     /// Invalidate already calculated after finish analyzerOperation data
     /// - Note: Override on subclasses
-    func invalidateAnalyzeData() {
+    open func invalidateAnalyzeData() {
     }
     
     /// Check if analyzed data already exist
     /// - Note: Override on subclasses
-    func isAnalyzeDataExist() -> Bool {
+    open func isAnalyzeDataExist() -> Bool {
         return false
     }
     
     /// Get already calculated analyzed data
     /// - Note: Override on subclasses
-    func getExistAnalyzeData(index: Int) -> Any? {
+    open func getExistAnalyzeData(index: Int) -> Any? {
         return nil
     }
     
     /// Get analyzed data from finished operation
     /// - Note: Override on subclasses
-    func getAnalyzeData(operation: Operation, index: Int) -> Any? {
+    open func getAnalyzeData(operation: Operation, index: Int) -> Any? {
         return nil
     }
 
