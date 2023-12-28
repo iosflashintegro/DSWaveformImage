@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-struct WaveformSupport {
+public struct WaveformSupport {
 
     static func convertQoS(_ sourceQoS: QualityOfService) -> DispatchQoS {
         var targetQoS: DispatchQoS = .default
@@ -51,8 +51,8 @@ struct WaveformSupport {
     }
     
     /// Devide segment into parts with part's width
-    static func devideSegment(segmentWidth: Int,
-                              itemWidth: Int) -> [Int] {
+    public static func devideSegment(segmentWidth: Int,
+                                     itemWidth: Int) -> [Int] {
         if segmentWidth <= 0 || itemWidth <= 0 {
             return []
         }
