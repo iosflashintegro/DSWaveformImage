@@ -10,6 +10,7 @@
 import Foundation
 import Accelerate
 import AVFoundation
+import vsdcCommonServices
 
 public protocol WaveformSamplesAnalyzerLinearOutputPass {
     var linearAmplitudes: [Float]? { get }

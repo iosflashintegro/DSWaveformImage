@@ -9,6 +9,7 @@ import Foundation
 import UIKit
 import Accelerate
 import AVFoundation
+import vsdcCommonServices
 
 
 /// Render waveform image from url with target time range
