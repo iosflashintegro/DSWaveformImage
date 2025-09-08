@@ -13,7 +13,7 @@ import vsdcCommonServices
 
 
 /// Render waveform image from url with target time range
-class WaveformTimeRangeImageRenderOperation: AsyncOperation, RenderOperation {
+class WaveformTimeRangeImageRenderOperation: AsyncOperation, RenderOperation, @unchecked Sendable {
     
     // MARK: RenderOperation
     public var index: Int?

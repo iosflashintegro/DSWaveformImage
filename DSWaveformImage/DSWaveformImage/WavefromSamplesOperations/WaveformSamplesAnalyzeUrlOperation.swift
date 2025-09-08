@@ -22,7 +22,7 @@ public protocol WaveformSamplesAnalyzerChunkOutputPass: Operation {
 
 
 /// Calculates samples from URL.
-public class WaveformSamplesAnalyzeUrlOperation: AsyncOperation {
+public class WaveformSamplesAnalyzeUrlOperation: AsyncOperation, @unchecked Sendable {
     
     fileprivate struct WaveformAnalysis {
         let amplitudes: [Float]
